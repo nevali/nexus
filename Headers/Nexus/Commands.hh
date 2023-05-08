@@ -90,14 +90,17 @@ namespace Nexus
 			char *_argv[16];
 	};
 
-#define DECLARE_BUILTIN(name) \
+# define DECLARE_COMMAND_(name, extra) \
 	class name: public Command \
 	{ \
 		public: \
 			static Command *construct(Parser *parser, const char *commandLine) { return new name(parser, commandLine); } \
 			name(Parser *parser, const char *commandLine): Command(parser, commandLine) { } \
 			virtual bool execute(Actor *actor); \
+			extra \
 	}
 }
+
+# define DECLARE_COMMAND(name) DECLARE_COMMAND_(name, /* */)
 
 #endif /*!NEXUS_COMMANDS_HH_*/

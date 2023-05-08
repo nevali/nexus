@@ -13,7 +13,7 @@ namespace Nexus
 	class Universe: public WARP::Flux::Object
 	{
 		public:
-			static const unsigned VERSION = 8;
+			static const unsigned VERSION = 7;
 			/* this can be adjusted if needed */
 			static const unsigned ID_MAX = 65536;
 		public:

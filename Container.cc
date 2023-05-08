@@ -105,7 +105,7 @@ Container::unpack(void)
 
 	updateIdent();
 	updateFlags();
-	fprintf(stderr, "Container<%p>::%s: unpacking %s (%s)\n", this, __FUNCTION__, name(), ident());
+//	fprintf(stderr, "Container<%p>::%s: unpacking %s (%s)\n", this, __FUNCTION__, name(), ident());
 	contents = json_object_get(_obj, "contents");
 	if(!contents)
 	{
@@ -137,7 +137,7 @@ Container::unpack(void)
 		}
 		/* invokes old-location->remove(thing) and this->add(thing) */
 		thing->setLocation(this);
-		fprintf(stderr, "- loaded %s (%s)\n", thing->name(), thing->ident());
+		fprintf(stderr, "Container<%p>::%s: unpacked %s (%s)\n", this, __FUNCTION__, thing->name(), thing->ident());
 		thing->release();
 	}
 }

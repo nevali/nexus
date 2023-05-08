@@ -182,7 +182,7 @@ Universe::acquire(Thing *thing)
 
 	if(newSize > _objectsSize)
 	{
-		fprintf(stderr, "Universe::%s: resizing object cache from %lu to %lu\n", __FUNCTION__, _objectsSize, newSize);
+//		fprintf(stderr, "Universe::%s: resizing object cache from %lu to %lu\n", __FUNCTION__, _objectsSize, newSize);
 		p = (Thing **) realloc(_objects, newSize * sizeof(Thing *));
 		if(!p)
 		{
@@ -202,7 +202,7 @@ Universe::acquire(Thing *thing)
 	 * Thing::~Thing()
 	 */
 	_objects[id] = thing;
-	fprintf(stderr, "Universe::%s: acquired Thing<%p> %s\n", __FUNCTION__, thing, thing->ident());
+//	fprintf(stderr, "Universe::%s: acquired Thing<%p> %s\n", __FUNCTION__, thing, thing->ident());
 	thing->setUniverse(this);
 }
 
@@ -215,7 +215,7 @@ Universe::discard(Thing *thing)
 	{
 		if(_objects[id])
 		{
-			fprintf(stderr, "Universe::%s: discarding object %s\n", __FUNCTION__, thing->ident());
+//			fprintf(stderr, "Universe::%s: discarding object %s\n", __FUNCTION__, thing->ident());
 			_objects[id] = NULL;
 		}
 	}

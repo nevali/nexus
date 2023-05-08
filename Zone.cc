@@ -22,6 +22,7 @@ Zone::nameIsSuitable(const char *newName) const
 			if(z == this)
 			{
 				z->release();
+				return true;
 			}
 			fprintf(stderr, "Zone<%p>::%s: a zone named '%s' (%s) already exists\n", this, __FUNCTION__, z->displayName(), z->ident());
 			z->release();

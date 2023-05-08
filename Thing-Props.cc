@@ -48,10 +48,10 @@ Thing::setId(Thing::ID id)
 	json_object_set(_obj, "id", json_integer(_id));
 	_status |= DIRTY;
 	updateIdent();
-	fprintf(stderr, "Thing<%p>::%s: updated ID to %s\n", this, __FUNCTION__, ident());
+//	fprintf(stderr, "Thing<%p>::%s: updated ID to %s\n", this, __FUNCTION__, ident());
 	if(_universe)
 	{
-		fprintf(stderr, "Thing<%p>::%s: will now inform the universe of our new identity\n", this, __FUNCTION__);
+//		fprintf(stderr, "Thing<%p>::%s: will now inform the universe of our new identity\n", this, __FUNCTION__);
 		_universe->acquire(this);
 	}
 	return true;

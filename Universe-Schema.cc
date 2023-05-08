@@ -115,7 +115,11 @@ Universe::migrateTo(unsigned newVersion)
 					fprintf(stderr, "Universe::%s: failed to set Root's ID to #2 (is %s)\n", __FUNCTION__, _root->ident());
 					return false;
 				}
-				_root->setDescription("You find yourself at the root of this particular universe.\n\nAlmost every object exists within this one.\n");
+				_root->setDescription(
+					"You find yourself at the root of this particular universe.\n"
+					"\n"
+					"Almost every object exists within this one.\n"
+					);
 			}
 		}
 		if(!_root->setFlag("system"))
@@ -256,84 +260,6 @@ Universe::migrateTo(unsigned newVersion)
 		var->setText("Please enter your name: ");
 		var->release();
 		messages->release();
-		json_object_set_new(_meta, "version", json_integer(newVersion));
-		return true;
-	}
-	if(newVersion == 8)
-	{
-		Thing *thing;
-		Container *entrance;
-		Zone *zone;
-		Variable *var;
-		json_t *obj;
-
-		fprintf(stderr, "Universe::%s: migrating to version %u\n", __FUNCTION__, newVersion);
-
-		/* create an initial player zone which can be modified or replaced as desired */
-		if(!(zone = zoneFromName("Main")))
-		{
-			zone = newZone("Main", true, _root);
-			if(!zone)
-			{
-				fprintf(stderr, "Universe::%s: failed to locate or create new zone 'Main'\n", __FUNCTION__);
-				return false;
-			}
-			zone->setDescription("This is a new, default zone that can be customised to your needs.\nFeel free to modify it in any way, or even delete it.");
-		}
-		json_object_set_new(_meta, "defaultZone", json_integer(zone->id()));
-		if((thing = zone->firstObjectNamed("Entrance", Thing::ROOM)))
-		{
-			entrance = thing->asContainer();
-		}
-		else
-		{
-			if((entrance = newRoom("Entrance", true, zone)))
-			{
-				entrance->setDescription(
-					"Greetings, traveller! Welcome to this brand new entrance room, in\n"
-					"your brand new zone, in a brand new universe!\n"
-					"\n"
-					"There's not a speck of dust, mainly because there isn't, well,\n"
-					"anything: it's extremely dull in here, but at least the paint smells\n"
-					"fresh.\n"
-					"\n"
-					"You should edit this as soon as you can, lest you expire from boredom\n"
-					"(or paint fumes).\n"
-				);
-			}
-		}
-		if(!entrance)
-		{
-			fprintf(stderr, "Universe::%s: failed to locate or create Entrance Room\n", __FUNCTION__);
-			zone->release();
-			return false;
-		}
-		entrance->setFlag("fixed");
-		if((thing = zone->firstObjectNamed("Settings", Thing::VARIABLE)))
-		{
-			var = thing->asVariable();
-		}
-		else
-		{
-			if((var = newVariable("Settings", true, zone)))
-			{
-				obj = json_object();
-				json_object_set_new(obj, "entrance", json_integer(entrance->id()));
-				var->setDescription("This is the Settings object for this Zone. It contains important\nparameters that govern how the Zone operates.");
-				var->setValue(obj);
-				json_decref(obj);
-			}
-		}
-		entrance->release();
-		if(!var)
-		{
-			fprintf(stderr, "Universe::%s: failed to locate or create new Settings object\n", __FUNCTION__);
-			zone->release();
-			return false;
-		}
-		var->setFlag("fixed");
-		var->release();
-		zone->release();
 		json_object_set_new(_meta, "version", json_integer(newVersion));
 		return true;
 	}

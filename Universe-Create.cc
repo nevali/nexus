@@ -41,7 +41,7 @@ Universe::createObject(json_t *object, const char *name, bool allocId, Container
 		Thing::ID id;
 
 		id = _db->nextId();
-		fprintf(stderr, "Universe::%s: Database-provided next ID is #%ld, local maximum is #%ld\n", __FUNCTION__, id, _maxId);
+//		fprintf(stderr, "Universe::%s: Database-provided next ID is #%ld, local maximum is #%ld\n", __FUNCTION__, id, _maxId);
 		if(id <= _maxId)
 		{
 			/* make sure multiple yet-to-be-synced objects don't end up with clashing IDs */
@@ -170,7 +170,7 @@ Universe::newPlayer(const char *name, bool allocId, Container *location)
 			return NULL;
 		}
 	}
-	fprintf(stderr, "Universe::%s: creating new Player '%s'\n", __FUNCTION__, name);
+//	fprintf(stderr, "Universe::%s: creating new Player '%s'\n", __FUNCTION__, name);
 	if(!(obj = playerTemplate()))
 	{
 		return NULL;
@@ -190,7 +190,7 @@ Universe::newContainer(const char *name, bool allocId, Container *location)
 	json_t *obj;
 	Thing *thing;
 
-	fprintf(stderr, "Universe::%s: creating new Container '%s'\n", __FUNCTION__, name);
+//	fprintf(stderr, "Universe::%s: creating new Container '%s'\n", __FUNCTION__, name);
 	if(!(obj = containerTemplate()))
 	{
 		return NULL;
@@ -220,7 +220,7 @@ Universe::newZone(const char *name, bool allocId, Container *location)
 			return NULL;
 		}
 	}
-	fprintf(stderr, "Universe::%s: creating new Zone '%s'\n", __FUNCTION__, name);
+//	fprintf(stderr, "Universe::%s: creating new Zone '%s'\n", __FUNCTION__, name);
 	if(!(obj = zoneTemplate()))
 	{
 		return NULL;
@@ -241,7 +241,7 @@ Universe::newRoom(const char *name, bool allocId, Container *location)
 	json_t *obj;
 	Thing *thing;
 
-	fprintf(stderr, "Universe::%s: creating new Room '%s'\n", __FUNCTION__, name);
+//	fprintf(stderr, "Universe::%s: creating new Room '%s'\n", __FUNCTION__, name);
 	if(!(obj = roomTemplate()))
 	{
 		return NULL;
@@ -262,7 +262,7 @@ Universe::newThing(const char *name, bool allocId, Container *location)
 	json_t *obj;
 	Thing *thing;
 
-	fprintf(stderr, "Universe::%s: creating new Thing '%s'\n", __FUNCTION__, name);
+//	fprintf(stderr, "Universe::%s: creating new Thing '%s'\n", __FUNCTION__, name);
 	if(!(obj = thingTemplate()))
 	{
 		return NULL;
@@ -282,7 +282,7 @@ Universe::newVariable(const char *name, bool allocId, Container *location)
 	json_t *obj;
 	Thing *thing;
 
-	fprintf(stderr, "Universe::%s: creating new Variable '%s'\n", __FUNCTION__, name);
+//	fprintf(stderr, "Universe::%s: creating new Variable '%s'\n", __FUNCTION__, name);
 	if(!(obj = variableTemplate()))
 	{
 		return NULL;

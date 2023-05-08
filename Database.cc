@@ -201,11 +201,14 @@ Database::jsonFromId(Thing::ID id)
 	char *p;
 
 	snprintf(_pathBuf, _pathBufSize, "%s/%ld/%ld.json", _basePath, id, id);
-	fprintf(stderr, "Database::%s: attempting to load %s\n", __FUNCTION__, _pathBuf);
+//	fprintf(stderr, "Database::%s: attempting to load %s\n", __FUNCTION__, _pathBuf);
 	obj = json_load_file(_pathBuf, 0, NULL);
 	if(!obj)
 	{
-		fprintf(stderr, "Database::%s: failed to load %s: %s\n", __FUNCTION__, _pathBuf, strerror(errno));
+		if(errno != ENOENT)
+		{
+			fprintf(stderr, "Database::%s: failed to load %s: %s\n", __FUNCTION__, _pathBuf, strerror(errno));
+		}
 		return NULL;
 	}
 	snprintf(_pathBuf, _pathBufSize, "%s/%ld/%ld.desc", _basePath, id, id);
@@ -237,7 +240,10 @@ Database::textFromFile(const char *path)
 	fd = ::open(path, O_RDONLY);
 	if(fd < 0)
 	{
-		fprintf(stderr, "Database::%s: %s: %s\n", __FUNCTION__, path, strerror(errno));
+		if(errno != ENOENT)
+		{
+			fprintf(stderr, "Database::%s: %s: %s\n", __FUNCTION__, path, strerror(errno));
+		}
 		return NULL;
 	}
 	pos = 0;

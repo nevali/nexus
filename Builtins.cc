@@ -7,44 +7,55 @@
 #include "Nexus/Commands.hh"
 #include "Nexus/Actor.hh"
 #include "Nexus/Player.hh"
+#include "Nexus/Zone.hh"
+#include "Nexus/Room.hh"
+#include "Nexus/Variable.hh"
 
 using namespace Nexus;
 
-DECLARE_BUILTIN(COMMANDS);
-DECLARE_BUILTIN(CREATE);
-DECLARE_BUILTIN(DESTROY);
-DECLARE_BUILTIN(DUMP);
-DECLARE_BUILTIN(EXAMINE);
-DECLARE_BUILTIN(LIST);
-DECLARE_BUILTIN(RENAME);
-DECLARE_BUILTIN(QUIT);
-DECLARE_BUILTIN(TELEPORT);
+namespace Nexus
+{
+	namespace Builtins
+	{
+		DECLARE_COMMAND(COMMANDS);
+		DECLARE_COMMAND_(CREATE,
+			bool createZone(Actor *who, const char *name);
+		);
+		DECLARE_COMMAND(DESTROY);
+		DECLARE_COMMAND(DUMP);
+		DECLARE_COMMAND(EXAMINE);
+		DECLARE_COMMAND(LIST);
+		DECLARE_COMMAND(RENAME);
+		DECLARE_COMMAND(QUIT);
+		DECLARE_COMMAND(TELEPORT);
+	}
+}
 
 BuiltinsParser::BuiltinsParser(Universe *universe):
 	Parser(universe)
 {
 	CommandEntry c[] = {
-		{ "BYE", CommandEntry::UNAMBIGUOUS|CommandEntry::HIDDEN, QUIT::construct, NULL },
+		{ "BYE", CommandEntry::UNAMBIGUOUS|CommandEntry::HIDDEN, Builtins::QUIT::construct, NULL },
 
-		{ "COMMANDS", CommandEntry::NONE, COMMANDS::construct, "List available commands" },
-		{ "CREATE", CommandEntry::NONE, CREATE::construct, "Create a new object" },
+		{ "COMMANDS", CommandEntry::NONE, Builtins::COMMANDS::construct, "List available commands" },
+		{ "CREATE", CommandEntry::NONE, Builtins::CREATE::construct, "Create a new object" },
 		
-		{ "DESTROY", CommandEntry::NONE, DESTROY::construct, "Destroy an object" },
-		{ "DUMP", CommandEntry::NONE, DUMP::construct, "Display the contents of an object as JSON" },
+		{ "DESTROY", CommandEntry::NONE, Builtins::DESTROY::construct, "Destroy an object" },
+		{ "DUMP", CommandEntry::NONE, Builtins::DUMP::construct, "Display the contents of an object as JSON" },
 		
-		{ "EXAMINE", CommandEntry::NONE, EXAMINE::construct, "Examine an object" },
-		{ "EXIT", CommandEntry::UNAMBIGUOUS|CommandEntry::HIDDEN, QUIT::construct, NULL },
+		{ "EXAMINE", CommandEntry::NONE, Builtins::EXAMINE::construct, "Examine an object" },
+		{ "EXIT", CommandEntry::UNAMBIGUOUS|CommandEntry::HIDDEN, Builtins::QUIT::construct, NULL },
 
 		{ "HELP", CommandEntry::NONE, NULL, "Browse the built-in Operator's Manual" },
 
-		{ "LIST", CommandEntry::NONE, LIST::construct, "List the contents of a container" },
-		{ "LOGOUT", CommandEntry::UNAMBIGUOUS|CommandEntry::HIDDEN, QUIT::construct, NULL },
+		{ "LIST", CommandEntry::NONE, Builtins::LIST::construct, "List the contents of a container" },
+		{ "LOGOUT", CommandEntry::UNAMBIGUOUS|CommandEntry::HIDDEN, Builtins::QUIT::construct, NULL },
 
-		{ "RENAME", CommandEntry::NONE, RENAME::construct, "Rename an object" },
+		{ "RENAME", CommandEntry::NONE, Builtins::RENAME::construct, "Rename an object" },
 
-		{ "TELEPORT", CommandEntry::NONE, TELEPORT::construct, "Move an object from one container to another" },
+		{ "TELEPORT", CommandEntry::NONE, Builtins::TELEPORT::construct, "Move an object from one container to another" },
 		
-		{ "QUIT", CommandEntry::UNAMBIGUOUS, QUIT::construct, "End your session" },
+		{ "QUIT", CommandEntry::UNAMBIGUOUS, Builtins::QUIT::construct, "End your session" },
 		{ NULL, CommandEntry::NONE, NULL, NULL }
 	};
 	add(c);
@@ -157,7 +168,7 @@ BuiltinsParser::parse(Actor *who, const char *commandLine)
 }
 
 bool
-COMMANDS::execute(Actor *actor)
+Builtins::COMMANDS::execute(Actor *actor)
 {
 	actor->send("=[ Built-in Commands ]=================================================\n");
 	for(size_t c = 0 ; c < _parser->commandCount(); c++)
@@ -173,9 +184,8 @@ COMMANDS::execute(Actor *actor)
 	return true;
 }
 
-
 bool
-CREATE::execute(Actor *actor)
+Builtins::CREATE::execute(Actor *actor)
 {
 	const char *name;
 
@@ -194,49 +204,105 @@ CREATE::execute(Actor *actor)
 	}
 	if(!strcasecmp(_argv[1], "/zone"))
 	{
-		Zone *newZone, *parent = actor->zone();
-
-		if(!parent)
-		{
-			parent = _universe->rootZone();
-		}
-		if(!parent)
-		{
-			parent = _universe->limbo();
-		}
-		if(!parent)
-		{
-			actor->send("Cannot create a new zone because you do are not in a zone\n");
-			return false;
-		}
-		if(parent->id() == Thing::ID_LIMBO)
-		{
-			/* if the actor is currently in Limbo, create the new zone in the root instead */
-			newZone = _universe->rootZone();
-			if(newZone)
-			{
-				parent->release();
-				parent = newZone;
-			}
-		}
-		newZone = _universe->newZone(name, true, parent);
-		if(newZone)
-		{
-			newZone->setOwner(actor);
-			actor->sendf("New Zone %s (%s) created within %s (%s)\n", newZone->displayName(), newZone->ident(), parent->displayName(), parent->ident());
-			newZone->release();
-			parent->release();
-			return true;			
-		}
-		parent->release();
-		return false;
+		return createZone(actor, name);
 	}
 	actor->sendf("Sorry, I don't know how to create a '%s'\n", _argv[1] + 1);
 	return false;
 }
 
 bool
-QUIT::execute(Actor *actor)
+Builtins::CREATE::createZone(Actor *actor, const char *name)
+{
+	Zone *newZone, *parent = actor->zone();
+	Room *entrance;
+	Variable *settings;
+	json_t *data;
+
+	if(!parent)
+	{
+		parent = _universe->rootZone();
+	}
+	if(!parent)
+	{
+		parent = _universe->limbo();
+	}
+	if(!parent)
+	{
+		actor->send("Cannot create a new zone because you do are not in a zone\n");
+		return false;
+	}
+	if(parent->id() == Thing::ID_LIMBO)
+	{
+		/* if the actor is currently in Limbo, create the new zone in the root instead */
+		newZone = _universe->rootZone();
+		if(newZone)
+		{
+			parent->release();
+			parent = newZone;
+		}
+	}
+	newZone = _universe->newZone(name, true, parent);
+	if(!newZone)
+	{
+		actor->sendf("Unable to create new Zone within %s (%s)\n", parent->displayName(), parent->ident());
+		parent->release();
+		return false;
+	}
+	newZone->setOwner(actor);
+	newZone->setDescription("This is a brand new zone which can be customised to your needs.\n");
+	actor->sendf("New Zone %s (%s) created within %s (%s)\n", newZone->displayName(), newZone->ident(), parent->displayName(), parent->ident());
+	entrance = _universe->newRoom("Entrance", true, newZone);
+	if(!entrance)
+	{
+		actor->sendf("Failed to create entrance to new Zone %s (%s)\n", newZone->displayName(), newZone->ident());
+	}
+	else
+	{
+		entrance->setOwner(actor);
+		entrance->setDescription(
+			"Greetings, traveller! Welcome to this brand new entrance room, in\n"
+			"your brand new zone!\n"
+			"\n"
+			"There's not a speck of dust, mainly because there isn't, well,\n"
+			"anything: it's extremely dull in here, but at least the paint smells\n"
+			"fresh.\n"
+			"\n"
+			"You should edit this description as soon as you can, lest you expire\n"
+			"from boredom... or paint fumes.\n"
+		);
+		actor->sendf("New Room %s (%s) created within %s %s\n", entrance->displayName(), entrance->ident(), newZone->displayName(), newZone->ident());
+	}
+	settings = _universe->newVariable("Settings", true, newZone);
+	if(!settings)
+	{
+		actor->sendf("Failed to create Settings object in new Zone %s (%s)\n", newZone->displayName(), newZone->ident());
+	}
+	else
+	{
+		settings->setOwner(actor);
+		data = json_object();
+		if(entrance)
+		{
+			json_object_set_new(data, "entrance", json_integer(entrance->id()));
+		}
+		settings->setValue(data);
+	}
+	/* Clean up */
+	if(settings)
+	{
+		settings->release();
+	}
+	if(entrance)
+	{
+		entrance->release();
+	}
+	newZone->release();
+	parent->release();
+	return true;			
+}
+
+bool
+Builtins::QUIT::execute(Actor *actor)
 {
 	actor->send("Goodbye!\n");
 	if(actor->isPlayer())
@@ -247,7 +313,7 @@ QUIT::execute(Actor *actor)
 }
 
 bool
-EXAMINE::execute(Actor *actor)
+Builtins::EXAMINE::execute(Actor *actor)
 {
 	Thing *thing;
 	bool r;
@@ -275,7 +341,7 @@ EXAMINE::execute(Actor *actor)
 }
 
 bool
-DESTROY::execute(Actor *actor)
+Builtins::DESTROY::execute(Actor *actor)
 {
 	Thing *thing;
 	bool r;
@@ -298,7 +364,7 @@ DESTROY::execute(Actor *actor)
 }
 
 bool
-DUMP::execute(Actor *actor)
+Builtins::DUMP::execute(Actor *actor)
 {
 	Thing *thing;
 
@@ -324,7 +390,7 @@ DUMP::execute(Actor *actor)
 }
 
 bool
-LIST::execute(Actor *actor)
+Builtins::LIST::execute(Actor *actor)
 {
 	Thing *thing;
 
@@ -352,7 +418,7 @@ LIST::execute(Actor *actor)
 }
 
 bool
-RENAME::execute(Actor *actor)
+Builtins::RENAME::execute(Actor *actor)
 {
 	Thing *thing;
 	const char *newName;
@@ -396,7 +462,7 @@ RENAME::execute(Actor *actor)
 }
 
 bool
-TELEPORT::execute(Actor *actor)
+Builtins::TELEPORT::execute(Actor *actor)
 {
 	Thing *thing, *dest;
 	Container *container;

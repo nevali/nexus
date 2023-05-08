@@ -202,11 +202,11 @@ Thing::Thing(json_t *source):
 	_typeId = typeIdFromJSON(_obj);
 	if(_id == ID_INVALID)
 	{
-		fprintf(stderr, "Thing<%p>::%s: instantiated anonymous object\n", this, __FUNCTION__);
+//		fprintf(stderr, "Thing<%p>::%s: instantiated anonymous object\n", this, __FUNCTION__);
 	}
 	else
 	{
-		fprintf(stderr, "Thing<%p>::%s: instantiated #%ld%c\n", this, __FUNCTION__, _id, (char) _typeId);
+//		fprintf(stderr, "Thing<%p>::%s: instantiated #%ld%c\n", this, __FUNCTION__, _id, (char) _typeId);
 	}
 }
 
