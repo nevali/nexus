@@ -32,7 +32,7 @@ BuiltinsParser::BuiltinsParser(Universe *universe):
 		{ "EXAMINE", CommandEntry::NONE, Builtins::EXAMINE::construct, "Examine an object" },
 		{ "EXIT", CommandEntry::UNAMBIGUOUS|CommandEntry::HIDDEN, Builtins::QUIT::construct, NULL },
 
-		{ "FLAG", CommandEntry::NONE, NULL, "Set or clear a flag on an object" },
+		{ "FLAG", CommandEntry::NONE, Builtins::FLAG::construct, "Set or clear a flag on an object" },
 
 		{ "GO", CommandEntry::NONE, Builtins::GO::construct, "@TELEPORT yourself" },
 

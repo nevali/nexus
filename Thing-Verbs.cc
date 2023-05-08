@@ -95,6 +95,11 @@ Thing::list(Actor *who)
 bool
 Thing::teleport(Actor *who, Container *dest)
 {
+	if(flags() & FIXED)
+	{
+		who->sendf("%s (%s) is FIXED\n", displayName(), ident());
+		return false;
+	}
 	if(setLocation(dest))
 	{
 		if(id() != ID_INVALID && id() == who->id())

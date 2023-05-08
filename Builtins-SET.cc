@@ -41,5 +41,6 @@ Builtins::SET::execute(Actor *actor)
 	{
 		actor->sendf("Sorry, I can't remove the %s of %s (%s)\n", property, thing->displayName(), thing->ident());
 	}
-	return true;
+	thing->release();
+	return false;
 }
