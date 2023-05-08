@@ -26,7 +26,9 @@ BuiltinsParser::BuiltinsParser(Universe *universe):
 		{ "DESTROY", CommandEntry::NONE, Builtins::DESTROY::construct, "Destroy an object" },
 		{ "DUMP", CommandEntry::NONE, Builtins::DUMP::construct, "Display the contents of an object as JSON" },
 		
+		{ "ECHO", CommandEntry::NONE, Builtins::ECHO::construct, "Echo text back to yourself" },
 		{ "EDIT", CommandEntry::NONE, NULL, "Edit an object's description" },
+		{ "EMIT", CommandEntry::NONE, Builtins::EMIT::construct, "Emit text from yourself" },
 		{ "EXAMINE", CommandEntry::NONE, Builtins::EXAMINE::construct, "Examine an object" },
 		{ "EXIT", CommandEntry::UNAMBIGUOUS|CommandEntry::HIDDEN, Builtins::QUIT::construct, NULL },
 

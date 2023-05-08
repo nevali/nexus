@@ -16,11 +16,11 @@ Limbo::Limbo():
 		"You find yourself in Limbo, a place which technically doesn't exist.\n"
 		"\n"
 		"If you are here because you have just created a new universe, you probably want\n"
-		"to create new Zone with\n"
+		"to create new Zone with:\n"
 		"\n"
 		"  @CREATE /ZONE somename\n"
 		"\n"
-		"and then you can @TELEPORT yourself to it to start building.\n"
+		"...and then you can @GO to it and start building.\n"
 	));
 	flags = json_object();
 	json_object_set(flags, "system", json_true());
