@@ -295,3 +295,23 @@ Universe::newVariable(const char *name, bool allocId, Container *location)
 	}
 	return thing->asVariable();
 }
+
+Portal *
+Universe::newPortal(const char *name, bool allocId, Container *location)
+{
+	json_t *obj;
+	Thing *thing;
+
+//	fprintf(stderr, "Universe::%s: creating new Portal '%s'\n", __FUNCTION__, name);
+	if(!(obj = portalTemplate()))
+	{
+		return NULL;
+	}
+	thing = createObject(obj, name, allocId, location);
+	json_decref(obj);
+	if(!thing)
+	{
+		return NULL;
+	}
+	return thing->asPortal();
+}

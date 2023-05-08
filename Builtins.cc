@@ -10,6 +10,7 @@
 #include "Nexus/Zone.hh"
 #include "Nexus/Room.hh"
 #include "Nexus/Variable.hh"
+#include "Nexus/Portal.hh"
 
 using namespace Nexus;
 
@@ -19,10 +20,14 @@ namespace Nexus
 	{
 		DECLARE_COMMAND(COMMANDS);
 		DECLARE_COMMAND_(CREATE,
+			bool createThing(Actor *who, const char *name);
 			bool createZone(Actor *who, const char *name);
+			bool createRoom(Actor *who, const char *name);
+			bool createPortal(Actor *who, const char *name);
 		);
 		DECLARE_COMMAND(DESTROY);
 		DECLARE_COMMAND(DUMP);
+		DECLARE_COMMAND(EDIT);
 		DECLARE_COMMAND(EXAMINE);
 		DECLARE_COMMAND(LIST);
 		DECLARE_COMMAND(RENAME);
@@ -43,6 +48,7 @@ BuiltinsParser::BuiltinsParser(Universe *universe):
 		{ "DESTROY", CommandEntry::NONE, Builtins::DESTROY::construct, "Destroy an object" },
 		{ "DUMP", CommandEntry::NONE, Builtins::DUMP::construct, "Display the contents of an object as JSON" },
 		
+		{ "EDIT", CommandEntry::NONE, NULL, "Edit an object's description" },
 		{ "EXAMINE", CommandEntry::NONE, Builtins::EXAMINE::construct, "Examine an object" },
 		{ "EXIT", CommandEntry::UNAMBIGUOUS|CommandEntry::HIDDEN, Builtins::QUIT::construct, NULL },
 
@@ -52,6 +58,8 @@ BuiltinsParser::BuiltinsParser(Universe *universe):
 		{ "LOGOUT", CommandEntry::UNAMBIGUOUS|CommandEntry::HIDDEN, Builtins::QUIT::construct, NULL },
 
 		{ "RENAME", CommandEntry::NONE, Builtins::RENAME::construct, "Rename an object" },
+
+		{ "SET", CommandEntry::NONE, NULL, "Set a property on an object" },
 
 		{ "TELEPORT", CommandEntry::NONE, Builtins::TELEPORT::construct, "Move an object from one container to another" },
 		
@@ -202,9 +210,21 @@ Builtins::CREATE::execute(Actor *actor)
 	{
 		name = NULL;
 	}
+	if(!strcasecmp(_argv[1], "/thing"))
+	{
+		return createThing(actor, name);
+	}
 	if(!strcasecmp(_argv[1], "/zone"))
 	{
 		return createZone(actor, name);
+	}
+	if(!strcasecmp(_argv[1], "/room"))
+	{
+		return createRoom(actor, name);
+	}
+	if(!strcasecmp(_argv[1], "/portal"))
+	{
+		return createPortal(actor, name);
 	}
 	actor->sendf("Sorry, I don't know how to create a '%s'\n", _argv[1] + 1);
 	return false;
@@ -298,7 +318,75 @@ Builtins::CREATE::createZone(Actor *actor, const char *name)
 	}
 	newZone->release();
 	parent->release();
+	return true;
+}
+
+bool
+Builtins::CREATE::createRoom(Actor *actor, const char *name)
+{
+	Zone *parent = actor->zone();
+	Room *newRoom;
+
+	if(!parent)
+	{
+		actor->send("Cannot create a new room because you do are not in a zone\n");
+		return false;
+	}
+	newRoom = _universe->newRoom(name, true, parent);
+	if(!newRoom)
+	{
+		actor->sendf("Unable to create new Room within %s (%s)\n", parent->displayName(), parent->ident());
+		parent->release();
+		return false;
+	}
+	newRoom->setOwner(actor);
+	newRoom->setDescription("This is a brand new room, ready for decorating!\n");
+	actor->sendf("New Room %s (%s) created within %s (%s)\n", newRoom->displayName(), newRoom->ident(), parent->displayName(), parent->ident());
+	newRoom->release();
+	parent->release();
 	return true;			
+}
+
+bool
+Builtins::CREATE::createPortal(Actor *actor, const char *name)
+{
+	Container *parent = actor->location();
+	Portal *newPortal;
+
+	if(!parent)
+	{
+		actor->send("Cannot create a new portal because you do not seem to be anywhere\n");
+		return false;
+	}
+	newPortal = _universe->newPortal(name, true, parent);
+	if(!newPortal)
+	{
+		actor->sendf("Unable to create new Portal within %s (%s)\n", parent->displayName(), parent->ident());
+		parent->release();
+		return false;
+	}
+	newPortal->setOwner(actor);
+	actor->sendf("New Portal %s (%s) created within %s (%s)\n", newPortal->displayName(), newPortal->ident(), parent->displayName(), parent->ident());
+	newPortal->release();
+	parent->release();
+	return true;
+}
+
+bool
+Builtins::CREATE::createThing(Actor *actor, const char *name)
+{
+	Thing *newThing;
+
+	newThing = _universe->newThing(name, true, actor);
+	if(!newThing)
+	{
+		actor->sendf("Unable to create new Thing within %s (%s)\n", actor->displayName(), actor->ident());
+		return false;
+	}
+	newThing->setOwner(actor);
+	actor->sendf("New Thing %s (%s) created within %s (%s)\n", newThing->displayName(), newThing->ident(), actor->displayName(), actor->ident());
+	newThing->release();
+	return true;
 }
 
 bool

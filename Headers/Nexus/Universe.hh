@@ -71,6 +71,7 @@ namespace Nexus
 			virtual Room *newRoom(const char *name = NULL, bool allocId = false, Container *location = NULL) __attribute__ (( warn_unused_result ));
 			virtual Zone *newZone(const char *name = NULL, bool allocId = false, Container *location = NULL) __attribute__ (( warn_unused_result ));
 			virtual Thing *newThing(const char *name = NULL, bool allocId = false, Container *location = NULL) __attribute__ (( warn_unused_result ));
+			virtual Portal *newPortal(const char *name = NULL, bool allocId = false, Container *location = NULL) __attribute__ (( warn_unused_result ));
 			virtual Variable *newVariable(const char *name = NULL, bool allocId = false, Container *location = NULL) __attribute__ (( warn_unused_result ));
 			virtual Parser *parserForCommand(Actor *actor, const char *commandLine) __attribute__ (( warn_unused_result ));
 		protected:
