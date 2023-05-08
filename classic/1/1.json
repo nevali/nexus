@@ -1,0 +1,12 @@
+{
+  "cname": "operator",
+  "contents": [],
+  "flags": {
+    "immortal": true,
+    "system": true
+  },
+  "id": 1,
+  "location": 105,
+  "name": "Operator",
+  "type": "player"
+}

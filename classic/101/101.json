@@ -1,0 +1,12 @@
+{
+  "cname": "connect",
+  "contents": [],
+  "flags": {
+    "fixed": true,
+    "system": true
+  },
+  "id": 101,
+  "location": 4,
+  "name": "connect",
+  "type": "variable"
+}

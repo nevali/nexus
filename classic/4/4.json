@@ -1,0 +1,16 @@
+{
+  "cname": "messages",
+  "contents": [
+    101,
+    102,
+    103
+  ],
+  "flags": {
+    "fixed": true,
+    "system": true
+  },
+  "id": 4,
+  "location": 3,
+  "name": "Messages",
+  "type": "container"
+}

@@ -1,0 +1,12 @@
+{
+  "cname": "loginopen",
+  "contents": [],
+  "flags": {
+    "fixed": true,
+    "system": true
+  },
+  "id": 102,
+  "location": 4,
+  "name": "login-open",
+  "type": "variable"
+}

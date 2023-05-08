@@ -1,0 +1,15 @@
+{
+  "cname": "root",
+  "contents": [
+    3,
+    104
+  ],
+  "flags": {
+    "fixed": true,
+    "hidden": true,
+    "system": true
+  },
+  "id": 2,
+  "name": "Root",
+  "type": "zone"
+}

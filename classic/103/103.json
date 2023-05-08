@@ -1,0 +1,12 @@
+{
+  "cname": "loginclosed",
+  "contents": [],
+  "flags": {
+    "fixed": true,
+    "system": true
+  },
+  "id": 103,
+  "location": 4,
+  "name": "login-closed",
+  "type": "variable"
+}

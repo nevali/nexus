@@ -1,0 +1,13 @@
+{
+  "cname": "zork",
+  "contents": [
+    105,
+    106
+  ],
+  "flags": {},
+  "id": 104,
+  "location": 2,
+  "name": "Zork",
+  "owner": 1,
+  "type": "zone"
+}

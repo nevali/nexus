@@ -1,0 +1,14 @@
+{
+  "cname": "system",
+  "contents": [
+    4
+  ],
+  "flags": {
+    "fixed": true,
+    "system": true
+  },
+  "id": 3,
+  "location": 2,
+  "name": "System",
+  "type": "zone"
+}

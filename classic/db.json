@@ -1,0 +1,12 @@
+{
+  "created": 1683560768,
+  "lastUpdate": 1683561033,
+  "maxId": 106,
+  "reserve": 100,
+  "settings": {},
+  "universe": {
+    "name": "Classic Worlds",
+    "version": 7
+  },
+  "version": 1
+}

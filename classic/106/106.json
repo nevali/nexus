@@ -1,0 +1,13 @@
+{
+  "cname": "settings",
+  "contents": [],
+  "flags": {},
+  "id": 106,
+  "location": 104,
+  "name": "Settings",
+  "owner": 1,
+  "type": "variable",
+  "value": {
+    "entrance": 105
+  }
+}
