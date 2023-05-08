@@ -118,6 +118,10 @@ namespace Nexus
 		DECLARE_COMMAND(EXAMINE);
 		DECLARE_COMMAND(FLAG);
 		DECLARE_COMMAND(GO);
+		DECLARE_COMMAND_(HELP,
+			bool intro(Actor *who);
+			bool disclaimers(Actor *who);
+		);
 		DECLARE_COMMAND(LIST);
 		DECLARE_COMMAND(LOOK);
 		DECLARE_COMMAND(OEMIT);

@@ -36,7 +36,7 @@ BuiltinsParser::BuiltinsParser(Universe *universe):
 
 		{ "GO", CommandEntry::NONE, Builtins::GO::construct, "@TELEPORT yourself" },
 
-		{ "HELP", CommandEntry::NONE, NULL, "Browse the built-in Operator's Manual" },
+		{ "HELP", CommandEntry::NONE, Builtins::HELP::construct, "Browse the built-in Operator's Manual" },
 
 		{ "LIST", CommandEntry::NONE, Builtins::LIST::construct, "List the contents of a container" },
 		{ "LOOK", CommandEntry::NONE, Builtins::LOOK::construct, "Display the current location's description" },
