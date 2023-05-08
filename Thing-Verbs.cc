@@ -10,15 +10,16 @@
 
 using namespace Nexus;
 
-void
+bool
 Thing::dump(Actor *player)
 {
 	(void) player;
 
 	dumpf(stderr);
+	return true;
 }
 
-void
+bool
 Thing::look(Actor *player)
 {
 	const char *desc;
@@ -31,9 +32,10 @@ Thing::look(Actor *player)
 	{
 		player->sendf("You are in %s\n", displayName());
 	}
+	return true;
 }
 
-void
+bool
 Thing::examine(Actor *player)
 {
 	Thing *loc;
@@ -68,6 +70,7 @@ Thing::examine(Actor *player)
 	}
 	examineSections(player);
 	player->send("=======================================================================\n");
+	return true;
 }
 
 void
@@ -82,35 +85,38 @@ Thing::examineSections(Actor *player)
 	}
 }
 
-void
+bool
 Thing::list(Actor *who)
 {
 	who->send("It can't contain anything.\n");
+	return true;
 }
 
-void
+bool
 Thing::teleport(Actor *who, Container *dest)
 {
 	if(setLocation(dest))
 	{
 		if(id() != ID_INVALID && id() == who->id())
 		{
+			/* this should be a trigger */
 			dest->look(who);
 		}
-		return;
+		return true;
 	}
-
+	who->sendf("Cannot teleport %s (%s) to %s (%s)\n", who->displayName(), who->ident(), dest->displayName(), dest->ident());
+	return false;
 }
 
-void
+bool
 Thing::destroy(Actor *who)
 {
 	bool prev;
 
 	if(flags() & SYSTEM)
 	{
-		who->sendf("Sorry, system object %s cannot be @DESTROYed\n", ident());
-		return;
+		who->sendf("System object %s cannot be @DESTROYed\n", ident());
+		return false;
 	}
 	prev = (flags() & DELETED);
 	setLocation(Thing::ID_LIMBO);
@@ -126,14 +132,81 @@ Thing::destroy(Actor *who)
 	{
 		who->sendf("%s (%s) destroyed\n", displayName(), ident());
 	}
+	return true;
 }
 
-void
+bool
 Thing::flag(Actor *who, const char *flag, bool onOff)
 {
+	if(flags() & SYSTEM)
+	{
+		who->sendf("System objects' flags cannot be modified\n");
+		return false;
+	}
+	if(!strcasecmp(flag, "deleted"))
+	{
+		who->sendf("An object cannot be deleted with @FLAG; use @DESTROY instead\n");
+		return false;
+	}
 	if(setFlag(flag, onOff))
 	{
-		who->send("Flags updated\n");
+		return true;
 	}
+	who->sendf("Cannot modify the '%s' flag of %s (%s)\n", flag, displayName(), ident());
+	return false;
 }
 
+bool
+Thing::set(Actor *who, const char *name, const char *value)
+{
+	if(flags() & SYSTEM)
+	{
+		who->sendf("System objects' properties cannot be modified\n");
+		return false;
+	}
+	if(!name)
+	{
+		return false;
+	}
+	/* User properties begin with a $ and are just set on the JSON object */
+	if(name[0] == '$')
+	{
+		char cname[Database::MAX_CANON_NAME + 2];
+
+		cname[0] = '$';
+		Database::canonicalise(&(cname[1]), sizeof(cname) - 1, &name[1]);
+		if(!cname[1])
+		{
+			who->sendf("Invalid property name '%s'\n", name);
+			return false;
+		}
+		json_object_set_new(_obj, cname, json_string(value));
+		markDirty();
+		return true;
+	}
+	if(!strcasecmp(name, "name"))
+	{
+		return setName(value);
+	}
+	if(!strcasecmp(name, "description"))
+	{
+		return setDescription(value);
+	}
+	if(!strcasecmp(name, "flags"))
+	{
+		who->sendf("Flags cannot be set with @SET; use @FLAG instead\n");
+		return false;
+	}
+	if(!strcasecmp(name, "status"))
+	{
+		who->sendf("Status values cannot be modified with @SET\n");
+		return false;
+	}
+	if(!strcasecmp(name, "deleted"))
+	{
+		who->sendf("An object cannot be deleted with @SET; use @DESTROY instead\n");
+		return false;
+	}
+	who->sendf("Unknown property '%s' on %s (%s)\n", name, displayName(), ident());
+	return false;
+}

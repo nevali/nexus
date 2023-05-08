@@ -16,7 +16,7 @@ namespace Nexus
 		public:
 			virtual TypeID typeId(void) const { return CONTAINER; }
 			virtual bool isContainer(void) const { return true; }
-			virtual void list(Actor *who);
+			virtual bool list(Actor *who);
 			virtual Thing *firstObjectNamed(const char *name, Thing::TypeID type) __attribute__ (( warn_unused_result ));
 		protected:
 			virtual void unpack(void);

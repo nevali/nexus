@@ -164,13 +164,14 @@ namespace Nexus
 			/* built-in actions (verbs) that can be carried out by an Actor
 			 * these can all be overidden in subclasses
 			 */
-			virtual void destroy(Actor *who);
-			virtual void dump(Actor *who);
-			virtual void look(Actor *who);
-			virtual void examine(Actor *who);
-			virtual void list(Actor *who);
-			virtual void teleport(Actor *who, Container *destination);
-			virtual void flag(Actor *who, const char *flagName, bool onOff);
+			virtual bool destroy(Actor *who);
+			virtual bool dump(Actor *who);
+			virtual bool look(Actor *who);
+			virtual bool examine(Actor *who);
+			virtual bool list(Actor *who);
+			virtual bool teleport(Actor *who, Container *destination);
+			virtual bool flag(Actor *who, const char *flagName, bool onOff);
+			virtual bool set(Actor *who, const char *property, const char *value);
 		protected:
 			json_t *_obj;
 			Universe *_universe;

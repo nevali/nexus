@@ -59,7 +59,7 @@ Container::firstObjectNamed(const char *name, Thing::TypeID type)
 	return NULL;
 }
 
-void
+bool
 Container::list(Actor *player)
 {
 	player->send("=[ Contents ]==========================================================\n");
@@ -73,6 +73,7 @@ Container::list(Actor *player)
 		}
 	}
 	player->send("=======================================================================\n");
+	return true;
 }
 
 void

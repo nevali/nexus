@@ -99,8 +99,30 @@ namespace Nexus
 			virtual bool execute(Actor *actor); \
 			extra \
 	}
-}
-
 # define DECLARE_COMMAND(name) DECLARE_COMMAND_(name, /* */)
+
+	namespace Builtins
+	{
+		DECLARE_COMMAND(COMMANDS);
+		DECLARE_COMMAND_(CREATE,
+			bool createThing(Actor *who, const char *name);
+			bool createZone(Actor *who, const char *name);
+			bool createRoom(Actor *who, const char *name);
+			bool createPortal(Actor *who, const char *name);
+		);
+		DECLARE_COMMAND(DESTROY);
+		DECLARE_COMMAND(DUMP);
+		DECLARE_COMMAND(EDIT);
+		DECLARE_COMMAND(EXAMINE);
+		DECLARE_COMMAND(FLAG);
+		DECLARE_COMMAND(GO);
+		DECLARE_COMMAND(LIST);
+		DECLARE_COMMAND(LOOK);
+		DECLARE_COMMAND(QUIT);
+		DECLARE_COMMAND(RENAME);
+		DECLARE_COMMAND(SET);		
+		DECLARE_COMMAND(TELEPORT);
+	}
+}
 
 #endif /*!NEXUS_COMMANDS_HH_*/
