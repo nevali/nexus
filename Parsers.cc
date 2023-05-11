@@ -10,7 +10,9 @@ using namespace Nexus;
 
 Parser::Parser(Universe *universe):
 	Object(),
-	_universe(universe)
+	_universe(universe),
+	_commands(NULL),
+	_ncommands(0)
 {
 }
 
