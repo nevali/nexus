@@ -181,6 +181,73 @@ Vast numbers of both. This is pre-alpha.
 
 # Reference
 
+## Database
+
+As alluded to above, the `Database` is an encapsulation of a directory tree
+of JSON files into an extremely simple "NoSQL"-like database that uses
+incrementing integer numeric keys.
+
+The `Database` uses a simple file structure where the object with the ID `#1`
+is written to `db/1/1.json` and the object with the ID `#123456` is written to
+`db/123456/123456.json`.
+
+The `Database` has a couple of extra behaviours, however:
+
+* There's a `db/db.json` object which stores metadata. Currently, it contains information about the schema version, timestamps, identifier allocations, and the `Universe` configuration (below).
+* The lowest-numbered object identifiers are reserved for system use (this is technically configurable within the Database metadata).
+* If the object has properties named `description` or `text`, then these are written to separate files and not stored in the JSON object.
+* If the object is of type `Zone` or `Player` (see below), a simple index (consisting of an object with canonicalised names as keys and numeric object IDs as values) is maintained so they can be resolved by name
+
+## Universe
+
+The `Universe` is the manifestation of the JSON objects in a `Database`, and
+is really just a thin wrapper for lifecycle management and
+abstraction-cleanliness purposes.
+
+In particular, the `Universe` ensures that objects `#0` (`Limbo`),
+`#1` (`Operator`) and `#2` (the "root" `Zone`), all described in more detail
+below, exist and are cached in memory.
+
+A `Universe` has a _name_ and will over time have other configuration
+properties, which are stored within the `Database`'s metadata object.
+
+Here's an abbreviated example of how a Universe might be arranged:—
+
+```mermaid
+graph TD
+    Universe --> Limbo["Limbo (#0Z)"]
+    Universe --> Root["The Root (#2Z)"]
+    Root --> MansionZone["Madcap Max's Mansion of Monsters (#114Z)"]
+
+    MansionZone --> Mansion["Mansion of Monsters (#115R)"]
+    Mansion --> FirstFloor["First Floor (#116R)"]
+    Mansion --> GroundFloor["Ground Floor (#117R)"]
+    Mansion --> Basement["Basement (#118R)"]
+    Mansion --> SubBasement["Sub-Basement (#119R)"]
+    Mansion --> SubSubSubBasement["Sub-sub-sub-Basement (#120R)"]
+    SubSubSubBasement --> Operator["Operator (#1P)"]
+    SubSubSubBasement --> LockedDoor["A large locked door (#121E)"]
+    
+    MansionZone --> DungeonZone["The Dungeons (#122Z)"]
+    DungeonZone --> TortureChamber["The Torture Chamber (#123R)"]
+    TortureChamber --> Torturer["The Fearsome Torturer (#124A)"]
+
+    LockedDoor -.-> TortureChamber
+    Operator --> Leaflet["Leaflet (#108T)"]
+    Operator --> kick["kick (#156X)"]
+```
+
+More about the different types of objects is given below, but in the above
+you can see:
+
+* Zones (Limbo, The Root, Madcap Max's Mansion of Monsters, The Dungeons)
+* Locations (Mansion of Monsters, First Floor, Sub-sub-sub-Basement), etc.)
+* a non-player Actor (The Fearsome Torturer)
+* a Portal ("A large locked door"), which has a _target_ ("The Torture Chamber")
+* a Thing ("Leaflet")
+* an Executable — i.e., a command ("kick")
+* a Player ("Operator" — that is, you)
+
 ## Objects
 
 Every object in the universe has a numeric ID, which is written in the
@@ -189,8 +256,8 @@ form `#nnn`, or optionally `#nnnX`, where `X` is the type of object.
 IDs below `#100` are reserved for internal use. Some well-known IDs:
 
 * `#0Z` is the special `Zone`, `Limbo`
-* `#01P` is the built-in `Player` with full privileges, `Operator`
-* `#02Z` is the "root" `Zone`
+* `#1P` is the built-in `Player` with full privileges, `Operator`
+* `#2Z` is the "root" `Zone`
 
 Others may be added later.
 
@@ -198,8 +265,22 @@ When using built-in commands that operate on objects, you can always specify
 an object by its ID (e.g., `#104`), regardless of where in your universe that
 object actually is.
 
-Objects are polymorphic. A description of the different types of object is
-given below.
+Objects are polymorphic:
+
+```mermaid
+graph TD
+    Thing --> Container
+    Thing --> Portal
+    Thing --> Executable
+    Thing --> Variable
+    Thing --> Switch
+    Thing --> Timer
+    Container --> Zone
+    Container --> Room
+    Container --> Actor
+    Actor --> Player
+    Player --> Robot
+```
 
 ### Thing (`T`)
 
@@ -249,7 +330,7 @@ Besides the root object tree, the primary use for `Zones` is as a command
 evaluation scope. Commands (`Executable`s) placed directly within a `Zone`
 are available everywhere within that `Zone`, at any level in the hierarchy.
 
-## Room
+## Room (`R`)
 
 A `Room` represents a location: it has a title, a description, is type of
 `Container` so can contain scenery and `Players` and `Thing`s and, importantly,
