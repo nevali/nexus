@@ -178,3 +178,114 @@ quite tricky with the current implementation)
 # Bugs and to-do
 
 Vast numbers of both. This is pre-alpha.
+
+# Reference
+
+## Objects
+
+Every object in the universe has a numeric ID, which is written in the
+form `#nnn`, or optionally `#nnnX`, where `X` is the type of object.
+
+IDs below `#100` are reserved for internal use. Some well-known IDs:
+
+* `#0Z` is the special `Zone`, `Limbo`
+* `#01P` is the built-in `Player` with full privileges, `Operator`
+* `#02Z` is the "root" `Zone`
+
+Others may be added later.
+
+When using built-in commands that operate on objects, you can always specify
+an object by its ID (e.g., `#104`), regardless of where in your universe that
+object actually is.
+
+Objects are polymorphic. A description of the different types of object is
+given below.
+
+### Thing (`T`)
+
+`Thing`s are the base class for all in-universe objects: that is, everything
+is technically a `Thing`, but objects can be _just_ `Thing`s. These are used
+for simple objects that don't really need to do much, such as decorative
+items.
+
+### Container (`C`)
+
+`Container`s are another family of objects, all having the specific property
+that they can (predictably) contain other objects. A generic `Container` can
+hold any number of any type of object. Because this also includes the "hidden"
+objects that will be described below, `Container`s are important for enabling
+interactivity.
+
+### Zone (`Z`)
+
+`Zone`s are a way of partitioning your universe, with potentially different
+sets of rules, behaviours, and even commands. All objects (including `Players`)
+have a `Zone`, which is always the nearest parent container which is a `Zone`
+object. As a fallback, there is a special built-in `Zone` called `Limbo` which
+always has the object ID `#0`.
+
+When a universe is first bootstrapped, a "root" `Zone` object is created with
+the ID `#2`, and all zones that you create will ordinarily exist somewhere
+within that. This root `Zone` (and its entire contents) is loaded automatically
+when the universe starts up. 
+
+Moving (via `@teleport`) an object to `Limbo` has the effect then of removing
+it from the set of objects which will be kept in memory at all times: although
+they will remain in memory for as long as `Limbo` itself does, if you re-start
+the builder, you'll see that those objects aren't in `Limbo` any more, and in
+fact they don't appear to be _anywhere_. However, you can `@examine` them by
+specifying their IDs—which will cause them to be loaded from disk, their
+information displayed, and then discarded again. And of course you can
+`@teleport` them _back_ "into existence", even if you teleport them back to
+`Limbo` itself (although that will only persist until the builder is restarted).
+
+Internally, the `@destroy` command marks objects as destroyed and then moves
+them to `Limbo`. At some point, there will probably be both commands to discard
+objects from `Limbo` immediately (perhaps `@discard`), and to purge destroyed
+objects (or possibly move them to  "deleted" directory within the database
+tree).
+
+Besides the root object tree, the primary use for `Zones` is as a command
+evaluation scope. Commands (`Executable`s) placed directly within a `Zone`
+are available everywhere within that `Zone`, at any level in the hierarchy.
+
+## Room
+
+A `Room` represents a location: it has a title, a description, is type of
+`Container` so can contain scenery and `Players` and `Thing`s and, importantly,
+`Portal`s to other `Room`s.
+
+Although they're called `Room`s they are used for both indoor and outdoor
+notional locations, there is no technical difference besides how you describe
+them. You might wish to _introduce_ a distinction in your universe: perhaps
+you have weather events happen which don't impact indoor locations, but that
+ought to be achieveable via custom properties.
+
+## Portal
+
+A `Portal` is an object which has a _destination_, and `@teleporting` to a
+`Portal` transports you to that destination. A lot like a symbolic link or
+a hyperlink, depending upon your point of view.
+
+`Portal`s are therefore used to implement exits, which you can opt to name
+directionally, or more descriptively, or both.
+
+## Actor
+
+An `Actor` is an autonomous character.
+
+## Player
+
+A `Player` is a subclass of `Actor` which is primarily used to distinguish
+player from non-player characters.
+
+## Robot
+
+A `Robot` is a type of `Player` which is actually operated by some _other_
+software. How exactly a `Robot` is controlled is entirely TBD.
+
+## Executable
+
+## Switch
+
+## Timer
