@@ -9,10 +9,12 @@ right up until the point that MIT got threatened with legal action over the
 name, and so (the story goes), even though MIT's lawyers were pretty confident
 about their chances, they decided to give it a new name, and so it began…
 
-`*West of House*
+```
+West of House
 This is an open field west of a white house, with a boarded front door.
 There is a small mailbox here.
 A rubber mat saying 'Welcome to Zork!' lies by the door.`
+```
 
 Zork had a dungeon! a dragon! a wizard! a thief! treasure! labyrinths!
 puzzles! (but it was not an RPG)
