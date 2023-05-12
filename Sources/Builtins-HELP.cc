@@ -5,6 +5,13 @@
 
 using namespace Nexus;
 
+typedef struct
+{
+	const char *name;
+	const char *text;
+	const char *additional;
+} HelpEntry;
+
 bool
 Builtins::HELP::execute(Actor *actor)
 {

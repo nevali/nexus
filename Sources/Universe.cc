@@ -31,7 +31,7 @@ Universe::Universe(Database *db):
 	db->retain();
 	_meta = db->universe();
 	json_incref(_meta);
-	fprintf(stderr, "Universe::%s: universe version %u (current is %u)\n", __FUNCTION__, version(), VERSION);
+	fprintf(stderr, "Universe::%s: universe version %u (current is %u)\n", __FUNCTION__, version(), UVERSION);
 	fprintf(stderr, "Universe::%s: creating Limbo\n", __FUNCTION__);
 	_limbo = new Limbo();
 	_limbo->setUniverse(this);
@@ -505,7 +505,7 @@ Universe::version(void) const
 bool
 Universe::migrate(void)
 {
-	for(unsigned currentVersion = version(); currentVersion < VERSION; currentVersion = version())
+	for(unsigned currentVersion = version(); currentVersion < UVERSION; currentVersion = version())
 	{
 		if(!migrateTo(currentVersion + 1))
 		{

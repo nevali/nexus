@@ -22,7 +22,7 @@ main(int argc, char **argv)
 		fprintf(stderr, "%s: %s: %s\n", argv[0], argv[1], strerror(errno));
 		return 2;
 	}
-	fprintf(stderr, "%s: %s: database is version %u, current is %u\n", argv[0], argv[1], db->version(), Nexus::Database::VERSION);
+	fprintf(stderr, "%s: %s: database is version %u, current is %u\n", argv[0], argv[1], db->version(), Nexus::Database::DBVERSION);
 	r = db->migrate();
 	db->release();
 	if(!r)

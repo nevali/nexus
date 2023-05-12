@@ -12,7 +12,7 @@ namespace Nexus
 	class Database: public WARP::Flux::Object
 	{
 		public:
-			static const unsigned VERSION = 1;
+			static const unsigned DBVERSION = 1;
 			/* maximum length of a canonicalised name */
 			static const size_t MAX_CANON_NAME = 31;
 

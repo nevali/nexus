@@ -67,7 +67,7 @@ BuiltinsParser::parse(Actor *who, const char *commandLine)
 	command = NULL;
 	partial = NULL;
 	exact = NULL;
-	clash = NULL;
+	clash = false;
 	/* All built-in start with an '@' character followed by one or more
 	 * alphabetic characters; for our purposes we consider anything from
 	 * the '@' to the first whitespace OR forward-slash to the command

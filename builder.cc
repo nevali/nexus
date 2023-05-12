@@ -27,9 +27,9 @@ main(int argc, char **argv)
 		fprintf(stderr, "%s: %s: %s\n", argv[0], argv[1], strerror(errno));
 		return 2;
 	}
-	if(db->version() < Nexus::Database::VERSION)
+	if(db->version() < Nexus::Database::DBVERSION)
 	{
-		fprintf(stderr, "%s: %s: database is an old version (%u) and must be migrated to version %u\nUse 'nexus-migratedb %s'\n", argv[0], argv[1], db->version(), Nexus::Database::VERSION, argv[1]);
+		fprintf(stderr, "%s: %s: database is an old version (%u) and must be migrated to version %u\nUse 'nexus-migratedb %s'\n", argv[0], argv[1], db->version(), Nexus::Database::DBVERSION, argv[1]);
 		return 3;
 	}
 	universe = new Nexus::Universe(db);
@@ -38,7 +38,7 @@ main(int argc, char **argv)
 
 	if(!universe->migrate())
 	{
-		fprintf(stderr, "%s: %s: failed to migrate universe from version %u to version %u\n", argv[0], argv[1], universe->version(), Nexus::Universe::VERSION);
+		fprintf(stderr, "%s: %s: failed to migrate universe from version %u to version %u\n", argv[0], argv[1], universe->version(), Nexus::Universe::UVERSION);
 		universe->release();
 		return 4;
 	}

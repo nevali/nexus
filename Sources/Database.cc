@@ -539,7 +539,7 @@ Database::sync(void)
 bool
 Database::migrate(void)
 {
-	for(unsigned currentVersion = version(); currentVersion < VERSION; currentVersion = version())
+	for(unsigned currentVersion = version(); currentVersion < DBVERSION; currentVersion = version())
 	{
 		if(!migrateTo(currentVersion + 1))
 		{

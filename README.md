@@ -144,16 +144,18 @@ to. It's included as a submodule to ease that, so ensure after cloning you
 git submodule update --init --recursive
 ```
 
-Until I autotoolsify this project, you'll need to manually run:
+~~Until I autotoolsify this project, you'll need to manually run:~~
+
+Then to prepare (verbosely), configure (adjust `CPPFLAGS` to suit your tastes
+or omit entirely), and build:
 
 ```sh
-( cd WARP && autoreconf -fvi && ./configure && make )
+autoreconf -fvi && ./configure CPPFLAGS='-W -Wall -Werror -g -O0' && make
 ```
 
 You can then
 
 ```sh
-make
 ./nexus-createdb db
 ./nexus-builder db
 ```
@@ -167,7 +169,7 @@ command-line switch to force it to use an existing (empty) directory.
 If you manage to get it up and running, `@commands` lists available commands.
 
 At the time of writing, the parser doesn't know about quoted arguments or
-escaping so you can only set something's description to a single world. This
+escaping so you can only set something's description to a single word. This
 is suboptimal.
 
 (You can, however, always edit the `.json` and `.desc` files—don't do that
