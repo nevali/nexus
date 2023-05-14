@@ -1,4 +1,6 @@
-FROM debian:bullseye-slim AS builder
+FROM debian:bullseye-slim AS base
+
+FROM base AS buildbase
 
 RUN apt-get update -qq && apt-get -q -y install make clang automake autoconf libtool pkg-config libjansson-dev libssl-dev
 
@@ -6,39 +8,35 @@ ENV CC="clang"
 ENV CXX="clang++"
 ENV CPPFLAGS="-g -O0 -W -Wall -Werror"
 
-FROM builder AS nexus-build
+FROM buildbase AS builder
 
 RUN mkdir -p /src
 WORKDIR /src
 COPY . /src
 
-RUN autoreconf -fvi && ./configure && make clean && make && make check
+RUN autoreconf -fvi && ./configure --prefix=/nexus && make clean && make && make check && make install
 
-FROM builder AS devcontainer
+FROM buildbase AS devcontainer
 
-FROM debian:bullseye-slim AS nexus
+RUN apt-get install -qq -y valgrind gdb git procps nano locales-all
+VOLUME /workspace
+WORKDIR /workspace
+
+FROM base AS runtime
 
 RUN apt-get update -qq && apt-get install -qq -y libjansson4
 
 RUN mkdir -p /nexus/bin
-
-FROM nexus AS nexus-createdb
-COPY --from=nexus-build /src/nexus-createdb /nexus/bin
-
-
-FROM nexus AS nexus-migratedb
 VOLUME /nexus/db
-COPY --from=nexus-build /src/nexus-migratedb /nexus/bin
-CMD /nexus/bin/nexus-migratedb
+COPY --from=builder /nexus/lib /nexus/lib
 
-FROM nexus AS nexus-gdb
-RUN apt-get install -q -y gdb
-VOLUME /nexus/db
-COPY --from=nexus-build /src/nexus-builder /nexus/bin
-CMD [ "/usr/bin/gdb", "--args", "/nexus/bin/nexus-builder", "/nexus/db" ]
+FROM runtime AS nexus-createdb
+COPY --from=builder /nexus/bin/nexus-createdb /nexus/bin
 
-FROM nexus AS nexus-builder
-VOLUME /nexus/db
-COPY --from=nexus-build /src/nexus-builder /nexus/bin
+FROM runtime AS nexus-migratedb
+COPY --from=builder /nexus/bin/nexus-migratedb /nexus/bin
+CMD [ "/nexus/bin/nexus-migratedb" ]
+
+FROM runtime AS nexus-builder
+COPY --from=builder /nexus/bin/nexus-builder /nexus/bin
 CMD [ "/nexus/bin/nexus-builder", "/nexus/db" ]
-

@@ -1,0 +1,9 @@
+{
+	"name": "Nexus",
+	"dockerFile": "../Dockerfile",
+	"build": {
+		"target": "devcontainer"
+	},
+	"workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
+	"workspaceFolder": "/workspace"
+}
