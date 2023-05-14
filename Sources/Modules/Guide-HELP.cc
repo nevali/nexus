@@ -1,9 +1,11 @@
 #include <cstring>
 
+#include "Guide.hh"
+
 #include "Nexus/Actor.hh"
-#include "Nexus/Commands.hh"
 
 using namespace Nexus;
+using namespace Nexus::Modules::Guide;
 
 typedef struct
 {
@@ -13,7 +15,7 @@ typedef struct
 } HelpEntry;
 
 bool
-Builtins::HELP::execute(Actor *actor)
+HELP::execute(Actor *actor)
 {
 	if(_argc < 2)
 	{
@@ -32,7 +34,7 @@ Builtins::HELP::execute(Actor *actor)
 }
 
 bool
-Builtins::HELP::intro(Actor *actor)
+HELP::intro(Actor *actor)
 {
 	actor->send("=[ Operator's Guide ]==================================================\n");
 	actor->send("                 I  N  T  R  O  D  U  C  T  I  O  N                    \n");
@@ -90,7 +92,7 @@ Builtins::HELP::intro(Actor *actor)
 }
 
 bool
-Builtins::HELP::disclaimers(Actor *actor)
+HELP::disclaimers(Actor *actor)
 {
 	if(_argc >= 3)
 	{

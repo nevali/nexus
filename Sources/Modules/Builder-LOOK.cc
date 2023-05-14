@@ -1,22 +1,25 @@
+#include "Builder.hh"
+
 #include "Nexus/Actor.hh"
-#include "Nexus/Commands.hh"
 
 using namespace Nexus;
+using namespace Nexus::Modules::Builder;
 
 bool
-Builtins::EXAMINE::execute(Actor *actor)
+LOOK::execute(Actor *actor)
 {
 	Thing *thing;
-	bool r;
 
 	if(_argc > 2)
 	{
-		actor->send("Usage: @EXAMINE [WHAT]\n");
+		actor->send("Usage: @LOOK [WHAT]\n");
 		return false;
 	}
 	if(_argc < 2)
 	{
-		actor->examine(actor);
+		thing = actor->location();
+		thing->look(actor);
+		thing->release();
 		return true;
 	}
 	thing = actor->resolveTarget(_argv[1]);
@@ -25,8 +28,7 @@ Builtins::EXAMINE::execute(Actor *actor)
 		actor->sendf("Sorry, I can't find '%s'\n", _argv[1]);
 		return false;
 	}
-	r = true;
-	thing->examine(actor);
+	thing->look(actor);
 	thing->release();
-	return r;
+	return true;
 }

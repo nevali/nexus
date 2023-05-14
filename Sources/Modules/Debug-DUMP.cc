@@ -1,23 +1,23 @@
+#include "Debug.hh"
+
 #include "Nexus/Actor.hh"
-#include "Nexus/Commands.hh"
 
 using namespace Nexus;
+using namespace Nexus::Modules::Debug;
 
 bool
-Builtins::LIST::execute(Actor *actor)
+DUMP::execute(Actor *actor)
 {
 	Thing *thing;
 
 	if(_argc > 2)
 	{
-		actor->send("Usage: @LIST [WHAT]\n");
+		actor->send("Usage: @EXAMINE [WHAT]\n");
 		return false;
 	}
 	if(_argc < 2)
 	{
-		thing = actor->location();
-		thing->list(actor);
-		thing->release();
+		actor->dump(actor);
 		return true;
 	}
 	thing = actor->resolveTarget(_argv[1]);
@@ -26,7 +26,7 @@ Builtins::LIST::execute(Actor *actor)
 		actor->sendf("Sorry, I can't find '%s'\n", _argv[1]);
 		return false;
 	}
-	thing->list(actor);
+	thing->dump(actor);
 	thing->release();
 	return true;
 }

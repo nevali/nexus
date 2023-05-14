@@ -1,10 +1,12 @@
+#include "Comms.hh"
+
 #include "Nexus/Actor.hh"
-#include "Nexus/Commands.hh"
 
 using namespace Nexus;
+using namespace Nexus::Modules::Comms;
 
 bool
-Builtins::ECHO::execute(Actor *who)
+ECHO::execute(Actor *who)
 {
 	if(_argc != 2)
 	{

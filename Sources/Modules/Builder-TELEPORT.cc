@@ -1,11 +1,13 @@
+#include "Builder.hh"
+
 #include "Nexus/Actor.hh"
-#include "Nexus/Commands.hh"
 #include "Nexus/Portal.hh"
 
 using namespace Nexus;
+using namespace Nexus::Modules::Builder;
 
 bool
-Builtins::TELEPORT::execute(Actor *actor)
+TELEPORT::execute(Actor *actor)
 {
 	Thing *thing, *dest;
 	bool r;

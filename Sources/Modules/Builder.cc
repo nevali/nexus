@@ -12,8 +12,16 @@ using namespace Nexus::Modules::Builder;
 PROVIDE_MODULE(Builder);
 
 CommandEntry Builder::_commands[] = {
-	{ "CREATE", CommandEntry::NONE, CREATE::construct, NULL },
-	{ "DESTROY", CommandEntry::NONE, DESTROY::construct, NULL },
+	{ "CREATE", CommandEntry::NONE, CREATE::construct, "Create a new object" },
+	{ "DESTROY", CommandEntry::NONE, DESTROY::construct, "Destroy an object" },
+	{ "EXAMINE", CommandEntry::NONE, EXAMINE::construct, "Show detailed information about an object" },
+	{ "FLAG", CommandEntry::NONE, FLAG::construct, "Change an object's flags" },
+	{ "GO", CommandEntry::NONE, GO::construct, "Teleport yourself to a location" },
+	{ "LIST", CommandEntry::NONE, LIST::construct, "List the contents of an object" },
+	{ "LOOK", CommandEntry::NONE, LOOK::construct, "Display the description of an object" },
+	{ "RENAME", CommandEntry::NONE, RENAME::construct, "Change an object's name" },
+	{ "SET", CommandEntry::NONE, SET::construct, "Change an object's properties" },
+	{ "TELEPORT", CommandEntry::NONE, TELEPORT::construct, "Move an object to a location" },
 	{ NULL, CommandEntry::NONE, NULL, NULL }
 };
 

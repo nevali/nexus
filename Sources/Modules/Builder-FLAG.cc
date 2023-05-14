@@ -1,12 +1,14 @@
 #include <cstring>
 
+#include "Builder.hh"
+
 #include "Nexus/Actor.hh"
-#include "Nexus/Commands.hh"
 
 using namespace Nexus;
+using namespace Nexus::Modules::Builder;
 
 bool
-Builtins::FLAG::execute(Actor *actor)
+FLAG::execute(Actor *actor)
 {
 	Thing *thing;
 	const char *flag;
