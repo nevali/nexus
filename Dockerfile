@@ -31,12 +31,12 @@ VOLUME /nexus/db
 COPY --from=builder /nexus/lib /nexus/lib
 
 FROM runtime AS nexus-createdb
-COPY --from=builder /nexus/bin/nexus-createdb /nexus/bin
+COPY --from=builder /nexus/bin/createdb /nexus/bin
 
 FROM runtime AS nexus-migratedb
-COPY --from=builder /nexus/bin/nexus-migratedb /nexus/bin
-CMD [ "/nexus/bin/nexus-migratedb" ]
+COPY --from=builder /nexus/bin/migratedb /nexus/bin
+CMD [ "/nexus/bin/migratedb" ]
 
 FROM runtime AS nexus-builder
-COPY --from=builder /nexus/bin/nexus-builder /nexus/bin
-CMD [ "/nexus/bin/nexus-builder", "/nexus/db" ]
+COPY --from=builder /nexus/bin/builder /nexus/bin
+CMD [ "/nexus/bin/builder", "/nexus/db" ]

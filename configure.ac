@@ -68,8 +68,15 @@ AC_CONFIG_FILES([
 Makefile
 Sources/Makefile
 Sources/Modules/Makefile
+Tools/Makefile
+Tools/createdb/Makefile
+Tools/migratedb/Makefile
+Tools/builder/Makefile
 ])
 
+AC_CONFIG_FILES([nexus-createdb:nexus-createdb.sh.in],[chmod +x nexus-createdb])
+AC_CONFIG_FILES([nexus-migratedb:nexus-migratedb.sh.in],[chmod +x nexus-migratedb])
+AC_CONFIG_FILES([nexus-builder:nexus-builder.sh.in],[chmod +x nexus-builder])
 AC_CONFIG_FILES([debug-builder:debug-builder.sh.in],[chmod +x debug-builder])
 
 AC_OUTPUT

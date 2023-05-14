@@ -1,0 +1,1 @@
+SUBDIRS = createdb migratedb builder
