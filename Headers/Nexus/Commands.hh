@@ -1,6 +1,8 @@
 #ifndef NEXUS_COMMANDS_HH_
 # define NEXUS_COMMANDS_HH_
 
+# include <cstddef>
+
 # include "WARP/Flux/Object.hh"
 
 namespace Nexus
@@ -52,8 +54,12 @@ namespace Nexus
 			}
 
 		protected:
+			friend class ModuleImplementation;
+
 			bool add(const CommandEntry *entry);
+			bool remove(const CommandEntry *entry);
 			bool add(const CommandEntry &entry);
+			bool remove(const CommandEntry &entry);
 		protected:
 			Universe *_universe;
 			CommandEntry *_commands;
@@ -103,34 +109,12 @@ namespace Nexus
 
 	namespace Builtins
 	{
-		DECLARE_COMMAND(COMMANDS);
-		DECLARE_COMMAND_(CREATE,
-			bool createThing(Actor *who, const char *name);
-			bool createZone(Actor *who, const char *name);
-			bool createRoom(Actor *who, const char *name);
-			bool createPortal(Actor *who, const char *name);
-		);
-		DECLARE_COMMAND(DESTROY);
-		DECLARE_COMMAND(DUMP);
-		DECLARE_COMMAND(ECHO);
-		DECLARE_COMMAND(EDIT);
-		DECLARE_COMMAND(EMIT);
-		DECLARE_COMMAND(EXAMINE);
-		DECLARE_COMMAND(FLAG);
-		DECLARE_COMMAND(GO);
-		DECLARE_COMMAND_(HELP,
-			bool intro(Actor *who);
-			bool disclaimers(Actor *who);
-		);
-		DECLARE_COMMAND(LIST);
-		DECLARE_COMMAND(LOOK);
-		DECLARE_COMMAND(OEMIT);
 		DECLARE_COMMAND(QUIT);
-		DECLARE_COMMAND(RENAME);
-		DECLARE_COMMAND(SET);
-		DECLARE_COMMAND(SEND);	
-		DECLARE_COMMAND(TELEPORT);
-	}
+		DECLARE_COMMAND(COMMANDS);
+		DECLARE_COMMAND(MODULES);
+		DECLARE_COMMAND(ENABLE);
+		DECLARE_COMMAND(DISABLE);
+	};
 }
 
 #endif /*!NEXUS_COMMANDS_HH_*/

@@ -19,7 +19,6 @@ namespace Nexus
 	class Actor;
 	class Player;
 	class Robot;
-	class Hologram;
 	class Executable;
 	class Variable;
 	
@@ -39,7 +38,6 @@ namespace Nexus
 				PORTAL =     'E',
 				PLAYER =     'P',
 				ROBOT =      'B',
-				HOLOGRAM =   'H',
 				EXECUTABLE = 'X',
 				VARIABLE =   'V',
 				SWITCH =     'S',
@@ -54,7 +52,8 @@ namespace Nexus
 				FIXED = (1<<3),
 				IMMORTAL = (1<<4), /* Actors */
 				LOCKED = (1<<5),  /* Containers */
-				DELETED = (1<<6)
+				DELETED = (1<<6),
+				HOLOGRAM = (1<<7)
 			} Flags;
 
 			typedef enum
@@ -106,7 +105,6 @@ namespace Nexus
 			virtual bool isActor(void) const { return false; };
 			virtual bool isPlayer(void) const { return false; };
 			virtual bool isRobot(void) const { return false; };
-			virtual bool isHologram(void) const { return false; };
 			virtual bool isExecutable(void) const { return false; };
 			virtual bool isVariable(void) const { return false; };
 			virtual Container *asContainer(void) const;
@@ -116,7 +114,6 @@ namespace Nexus
 			virtual Actor *asActor(void) const;
 			virtual Player *asPlayer(void) const;
 			virtual Robot *asRobot(void) const;
-			virtual Hologram *asHologram(void) const;
 			virtual Executable *asExecutable(void) const;
 			virtual Variable *asVariable(void) const;
 		public:

@@ -49,6 +49,10 @@ main(int argc, char **argv)
 		universe->release();
 		return 10;
 	}
+	if(!universe->activateModules())
+	{
+		fprintf(stderr, "%s: %s: warning: failed to activate one or more modules\n", argv[0], argv[1]);
+	}
 	player->connect();
 	universe->checkpoint();
 	while(player->connected())

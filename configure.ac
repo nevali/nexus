@@ -14,6 +14,12 @@
 ##  limitations under the License.
 
 AC_INIT([Nexus],[0.0])
+AC_PREFIX_DEFAULT([/opt/nexus])
+
+## Prevent autoconf from supplying undesirable defaults if not already set
+: ${CFLAGS=""}
+: ${CXXFLAGS=""}
+
 ## M4 macros are in a subdirectory named "M4"
 AC_CONFIG_MACRO_DIR([M4])
 ## Build scripts are in a subdirectory named "BuildScripts"
@@ -25,21 +31,28 @@ m4_ifndef([PKG_PREREQ],
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 AM_MAINTAINER_MODE
 
-AS_VAR_APPEND([AM_CPPFLAGS],[" -W -Wall"])
-AS_VAR_APPEND([AM_CXXFLAGS],[" -O0 -g"])
-
 AS_VAR_APPEND([AM_CPPFLAGS],[" -I\${top_srcdir}/PrivateHeaders"])
 AS_VAR_APPEND([AM_CPPFLAGS],[" -I\${top_srcdir}/Headers"])
 
 AC_SUBST([AM_CPPFLAGS])
 AC_SUBST([AM_CXXFLAGS])
 
-AC_PROG_CXX
+AC_PROG_CXX([clang++ g++ c++])
+
+if test "$GXX" = "yes" ; then
+	AS_VAR_APPEND([AM_CPPFLAGS],[" -W -Wall -Werror"])
+	AS_VAR_APPEND([AM_CXXFLAGS],[" -O0 -g"])
+fi
+
 
 LT_INIT
 PKG_PROG_PKG_CONFIG
 
 PKG_CHECK_MODULES([JANSSON],[jansson])
+
+AC_CHECK_FUNCS([dlopen],,[
+	AC_CHECK_LIB([dl],[dlopen])
+])
 
 AS_VAR_SET([FLUX_CFLAGS],["-I\${top_srcdir}/WARP/Headers"])
 AS_VAR_SET([FLUX_LIBS],["\${top_builddir}/WARP/Sources/Flux/libWARP-Flux.la"])
@@ -54,6 +67,9 @@ AS_VAR_APPEND([AM_CPPFLAGS],[" \${FLUX_CFLAGS}"])
 AC_CONFIG_FILES([
 Makefile
 Sources/Makefile
+Sources/Modules/Makefile
 ])
+
+AC_CONFIG_FILES([debug-builder:debug-builder.sh.in],[chmod +x debug-builder])
 
 AC_OUTPUT

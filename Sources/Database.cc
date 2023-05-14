@@ -103,6 +103,8 @@ Database::~Database()
 {
 	fprintf(stderr, "Database::%s: shutting down\n", __FUNCTION__);
 	json_decref(_meta);
+	json_decref(_playerIndex);
+	json_decref(_zoneIndex);
 	free(_basePath);
 	free(_pathBuf);
 }

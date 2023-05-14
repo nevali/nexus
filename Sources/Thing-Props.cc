@@ -45,7 +45,7 @@ Thing::setId(Thing::ID id)
 		}
 	}
 	_id = id;
-	json_object_set(_obj, "id", json_integer(_id));
+	json_object_set_new(_obj, "id", json_integer(_id));
 	_status |= DIRTY;
 	updateIdent();
 //	fprintf(stderr, "Thing<%p>::%s: updated ID to %s\n", this, __FUNCTION__, ident());
@@ -312,7 +312,7 @@ Thing::setLocation(ID newId)
 			}
 		}
 	}
-	json_object_set(_obj, "location", json_integer(newId));
+	json_object_set_new(_obj, "location", json_integer(newId));
 	markDirty();
 	if(_universe)
 	{

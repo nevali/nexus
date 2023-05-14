@@ -1,10 +1,12 @@
+#include "Builder.hh"
+
 #include "Nexus/Actor.hh"
-#include "Nexus/Commands.hh"
 
 using namespace Nexus;
+using namespace Nexus::Modules::Builder;
 
 bool
-Builtins::DESTROY::execute(Actor *actor)
+DESTROY::execute(Actor *actor)
 {
 	Thing *thing;
 	bool r;

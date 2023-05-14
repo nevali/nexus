@@ -13,7 +13,6 @@
 #include "Nexus/Actor.hh"
 #include "Nexus/Player.hh"
 #include "Nexus/Robot.hh"
-#include "Nexus/Hologram.hh"
 #include "Nexus/Executable.hh"
 #include "Nexus/Variable.hh"
 
@@ -78,10 +77,6 @@ typeIdFromJSON(json_t *source)
 	{
 		return Thing::ROBOT;
 	}
-	if(!strcmp(str, "hologram"))
-	{
-		return Thing::HOLOGRAM;
-	}
 	if(!strcmp(str, "executable"))
 	{
 		return Thing::EXECUTABLE;
@@ -135,14 +130,12 @@ Thing::objectFromJSON(json_t *source, bool isNew)
 			return new Player(source);
 		case ROBOT:
 			return new Robot(source);
-		case HOLOGRAM:
-			return new Hologram(source);
 		case EXECUTABLE:
 			return new Executable(source);
 		case VARIABLE:
 			return new Variable(source);
 		default:
-			fprintf(stderr, "Thing::%s: object has an unsupported typeId; ID = %ld, typeId = %c\n", __FUNCTION__, newId, newTypeId);
+			fprintf(stderr, "Thing::%s: object has a missing or unsupported typeId; ID = %ld, typeId = %c\n", __FUNCTION__, newId, newTypeId);
 			json_dumpf(source, stderr, JSON_INDENT(4) | JSON_PRESERVE_ORDER | JSON_ENCODE_ANY);
 			fprintf(stderr, "\n");
 	}

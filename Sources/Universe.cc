@@ -11,6 +11,7 @@
 #include "Nexus/Commands.hh"
 #include "Nexus/Variable.hh"
 #include "Nexus/Room.hh"
+#include "Nexus/Module.hh"
 
 using namespace Nexus;
 
@@ -25,7 +26,8 @@ Universe::Universe(Database *db):
 	_meta(NULL),
 	_builtinsParser(NULL),
 	_defaultParser(NULL),
-	_maxId(0)
+	_maxId(0),
+	_modules(NULL)
 {
 	fprintf(stderr, "Universe::%s: universe is starting up\n", __FUNCTION__);
 	db->retain();
@@ -56,6 +58,7 @@ Universe::Universe(Database *db):
 	fprintf(stderr, "Universe::%s: creating parsers\n", __FUNCTION__);
 	_builtinsParser = new BuiltinsParser(this);
 	fprintf(stderr, "Universe::%s: initialisation complete\n", __FUNCTION__);
+	_modules = new Universe::ModuleList(this);
 }
 
 Universe::~Universe()
@@ -63,6 +66,11 @@ Universe::~Universe()
 	size_t c, count;
 
 	fprintf(stderr, "Universe::%s: shutting down...\n", __FUNCTION__);
+	if(_modules)
+	{
+		fprintf(stderr, "- releasing modules\n");
+		_modules->release();
+	}
 	fprintf(stderr, "- releasing parsers\n");
 	if(_builtinsParser)
 	{
@@ -450,24 +458,6 @@ Universe::robotFromId(Thing::ID id)
 	return NULL;
 }
 
-Hologram *
-Universe::hologramFromId(Thing::ID id)
-{
-	Thing *thing;
-	Hologram *ret;
-
-	thing = thingFromId(id);
-	if(thing)
-	{
-		if((ret = thing->asHologram()))
-		{
-			return ret;
-		}
-		thing->release();
-	}
-	return NULL;
-}
-
 Executable *
 Universe::executableFromId(Thing::ID id)
 {
@@ -562,6 +552,17 @@ const char *
 Universe::name(void) const
 {
 	return json_string_value(json_object_get(_meta, "name"));
+}
+
+Parser *
+Universe::builtinsParser(void)
+{
+	if(_builtinsParser)
+	{
+		_builtinsParser->retain();
+		return _builtinsParser;
+	}
+	return NULL;
 }
 
 Parser *

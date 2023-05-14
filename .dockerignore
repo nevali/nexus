@@ -5,4 +5,8 @@
 **/*.exe
 **/*.dylib
 **/*.dll
-
+**/.libs
+**/.deps
+**/*~
+**/*.bak
+test

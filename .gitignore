@@ -40,3 +40,4 @@ stamp-h*
 /config.guess
 /libtool
 /ltmain.sh
+/debug-builder

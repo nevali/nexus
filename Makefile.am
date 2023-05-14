@@ -2,7 +2,7 @@ AMLOCAL_AMFLAGS = -I M4
 
 SUBDIRS = @subdirs@ Sources .
 
-noinst_PROGRAMS = nexus-builder nexus-createdb nexus-migratedb
+bin_PROGRAMS = nexus-builder nexus-createdb nexus-migratedb
 
 nexus_builder_SOURCES = builder.cc
 nexus_builder_LDADD = Sources/libNexus.la

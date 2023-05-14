@@ -21,32 +21,17 @@ BuiltinsParser::BuiltinsParser(Universe *universe):
 		{ "BYE", CommandEntry::UNAMBIGUOUS|CommandEntry::HIDDEN, Builtins::QUIT::construct, NULL },
 
 		{ "COMMANDS", CommandEntry::NONE, Builtins::COMMANDS::construct, "List available commands" },
-		{ "CREATE", CommandEntry::NONE, Builtins::CREATE::construct, "Create a new object" },
 		
-		{ "DESTROY", CommandEntry::NONE, Builtins::DESTROY::construct, "Destroy an object" },
-		{ "DUMP", CommandEntry::NONE, Builtins::DUMP::construct, "Display the contents of an object as JSON" },
+		{ "DISABLE", CommandEntry::NONE, Builtins::DISABLE::construct, "Disable a module" },
 		
-		{ "ECHO", CommandEntry::NONE, Builtins::ECHO::construct, "Echo text back to yourself" },
-		{ "EDIT", CommandEntry::NONE, NULL, "Edit an object's description" },
-		{ "EMIT", CommandEntry::NONE, Builtins::EMIT::construct, "Emit text from yourself" },
-		{ "EXAMINE", CommandEntry::NONE, Builtins::EXAMINE::construct, "Examine an object" },
+		{ "ENABLE", CommandEntry::NONE, Builtins::ENABLE::construct, "Enable a module" },
+		
 		{ "EXIT", CommandEntry::UNAMBIGUOUS|CommandEntry::HIDDEN, Builtins::QUIT::construct, NULL },
 
-		{ "FLAG", CommandEntry::NONE, Builtins::FLAG::construct, "Set or clear a flag on an object" },
-
-		{ "GO", CommandEntry::NONE, Builtins::GO::construct, "@TELEPORT yourself" },
-
-		{ "HELP", CommandEntry::NONE, Builtins::HELP::construct, "Browse the built-in Operator's Manual" },
-
-		{ "LIST", CommandEntry::NONE, Builtins::LIST::construct, "List the contents of a container" },
-		{ "LOOK", CommandEntry::NONE, Builtins::LOOK::construct, "Display the current location's description" },
 		{ "LOGOUT", CommandEntry::UNAMBIGUOUS|CommandEntry::HIDDEN, Builtins::QUIT::construct, NULL },
+		{ "LSMOD", CommandEntry::UNAMBIGUOUS|CommandEntry::HIDDEN, Builtins::MODULES::construct, NULL },
 
-		{ "RENAME", CommandEntry::NONE, Builtins::RENAME::construct, "Rename an object" },
-
-		{ "SET", CommandEntry::NONE, Builtins::SET::construct, "Set a property on an object" },
-
-		{ "TELEPORT", CommandEntry::NONE, Builtins::TELEPORT::construct, "Move an object from one container to another" },
+		{ "MODULES", CommandEntry::NONE, Builtins::MODULES::construct, "List active modules" },
 		
 		{ "QUIT", CommandEntry::UNAMBIGUOUS, Builtins::QUIT::construct, "End your session" },
 		{ NULL, CommandEntry::NONE, NULL, NULL }

@@ -2,6 +2,7 @@
 # define NEXUS_UNIVERSE_HH_
 
 # include "WARP/Flux/Object.hh"
+# include "WARP/Flux/Array.hh"
 
 # include "Thing.hh"
 # include "Limbo.hh"
@@ -9,6 +10,7 @@
 namespace Nexus
 {
 	class Parser;
+	class Module;
 
 	class Universe: public WARP::Flux::Object
 	{
@@ -16,6 +18,28 @@ namespace Nexus
 			static const unsigned UVERSION = 7;
 			/* this can be adjusted if needed */
 			static const unsigned ID_MAX = 65536;
+
+			class ModuleList: public WARP::Flux::TArray<Module>
+			{
+				public:
+					ModuleList(Universe *universe);
+				protected:
+					virtual ~ModuleList(void);
+					virtual void objectWillBeDestroyed(void);
+				public:
+					virtual bool activate(void);
+					virtual bool enable(const char *name);
+					virtual bool disable(const char *name);
+					virtual size_t add(Module *mod);
+					virtual bool remove(Module *mod);
+					Module *locateActiveModule(const char *name) __attribute__ (( warn_unused_result ));;
+				private:
+					Universe *_universe;
+					json_t *_modlist;
+					bool _activating;
+			};
+			friend class ModuleList;
+
 		public:
 			Universe(Database *db);
 		protected:
@@ -47,6 +71,10 @@ namespace Nexus
 			virtual bool sync(void);
 			virtual bool checkpoint(void);
 			virtual const char *name(void) const;
+			virtual bool activateModules(void);
+			virtual bool enableModule(const char *name);
+			virtual bool disableModule(const char *name);
+			virtual ModuleList *modules(void) __attribute__ (( warn_unused_result ));
 			virtual Thing *thingFromId(Thing::ID id) __attribute__ (( warn_unused_result ));
 			virtual Thing *thingFromName(const char *type, const char *name) __attribute__ (( warn_unused_result ));
 			virtual Limbo *limbo(void) const __attribute__ (( warn_unused_result ));
@@ -64,7 +92,6 @@ namespace Nexus
 			virtual Player *playerFromId(Thing::ID id) __attribute__ (( warn_unused_result ));
 			virtual Player *playerFromName(const char *name) __attribute__ (( warn_unused_result ));
 			virtual Robot *robotFromId(Thing::ID id) __attribute__ (( warn_unused_result ));
-			virtual Hologram *hologramFromId(Thing::ID id) __attribute__ (( warn_unused_result ));
 			virtual Executable *executableFromId(Thing::ID id) __attribute__ (( warn_unused_result ));
 			virtual Player *newPlayer(const char *name = NULL, bool allocId = false, Container *location = NULL) __attribute__ (( warn_unused_result ));
 			virtual Container *newContainer(const char *name = NULL, bool allocId = false, Container *location = NULL) __attribute__ (( warn_unused_result ));
@@ -74,6 +101,7 @@ namespace Nexus
 			virtual Portal *newPortal(const char *name = NULL, bool allocId = false, Container *location = NULL) __attribute__ (( warn_unused_result ));
 			virtual Variable *newVariable(const char *name = NULL, bool allocId = false, Container *location = NULL) __attribute__ (( warn_unused_result ));
 			virtual Parser *parserForCommand(Actor *actor, const char *commandLine) __attribute__ (( warn_unused_result ));
+			virtual Parser *builtinsParser(void) __attribute__ (( warn_unused_result ));
 		protected:
 			Thing **_objects;
 			size_t _objectsSize;
@@ -86,6 +114,7 @@ namespace Nexus
 			Parser *_builtinsParser;
 			Parser *_defaultParser;
 			Thing::ID _maxId;
+			ModuleList *_modules;
 	};
 }
 

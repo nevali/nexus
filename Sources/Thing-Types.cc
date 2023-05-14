@@ -12,7 +12,6 @@
 #include "Nexus/Actor.hh"
 #include "Nexus/Player.hh"
 #include "Nexus/Robot.hh"
-#include "Nexus/Hologram.hh"
 #include "Nexus/Executable.hh"
 #include "Nexus/Variable.hh"
 
@@ -43,8 +42,6 @@ Thing::typeName(Thing::TypeID typeId)
 			return "player";
 		case ROBOT:
 			return "robot";
-		case HOLOGRAM:
-			return "hologram";
 		case EXECUTABLE:
 			return "executable";
 		case VARIABLE:
@@ -95,16 +92,6 @@ Thing::asRobot(void) const
 	if(isRobot())
 	{
 		return static_cast<Robot *>((Thing *) this);
-	}
-	return NULL;
-}
-
-Hologram *
-Thing::asHologram(void) const
-{
-	if(isHologram())
-	{
-		return static_cast<Hologram *>((Thing *) this);
 	}
 	return NULL;
 }

@@ -10,6 +10,10 @@
 
 using namespace Nexus;
 
+/* This whole file is a horrible mess of leaky abstractions and should not be
+ * implemented this way
+ */
+
 bool
 Thing::dump(Actor *player)
 {

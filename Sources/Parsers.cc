@@ -18,6 +18,7 @@ Parser::Parser(Universe *universe):
 
 Parser::~Parser()
 {
+	free(_commands);
 }
 
 bool
@@ -42,6 +43,40 @@ Parser::add(const CommandEntry &entry)
 }
 
 bool
+Parser::remove(const CommandEntry &entry)
+{
+	for(size_t c = 0; c < _ncommands; c++)
+	{
+		if(!strcasecmp(_commands[c].name, entry.name) &&
+			_commands[c].constructor == entry.constructor)
+		{
+//			fprintf(stderr, "Parser::%s: removing entry %lu ('%s') from commands\n", __FUNCTION__, c, entry.name);
+			if(c + 1 < _ncommands)
+			{
+				/* move all of the following commands up a place */
+				memmove(&(_commands[c]), &(_commands[c + 1]), sizeof(CommandEntry) * (_ncommands - c - 1));
+			}
+			else
+			{
+				/* just terminate here */
+				memset(&(_commands[c]), 0, sizeof(CommandEntry));
+			}
+			_ncommands--;
+#if 0			
+			fprintf(stderr, "----- List is now -----\n");
+			for(size_t c = 0; c < _ncommands; c++)
+			{
+				fprintf(stderr, "  %lu => %s\n", c, _commands[c].name);
+			}
+			fprintf(stderr, "----------------------\n");
+#endif
+			return true;
+		}
+	}
+	return false;
+}
+
+bool
 Parser::add(const CommandEntry *entry)
 {
 	bool r;
@@ -53,6 +88,31 @@ Parser::add(const CommandEntry *entry)
 		{
 			fprintf(stderr, "Parser::%s: failed to add command entry '%s'\n", __FUNCTION__, entry[c].name);
 			r = false;
+		}
+		else
+		{
+			fprintf(stderr, "Parser::%s: registered command '%s'\n", __FUNCTION__, entry[c].name);
+		}
+	}
+	return r;
+}
+
+bool
+Parser::remove(const CommandEntry *entry)
+{
+	bool r;
+
+	r = true;
+	for(size_t c = 0; entry[c].name; c++)
+	{
+		if(!remove(entry[c]))
+		{
+			fprintf(stderr, "Parser::%s: failed to remove command entry '%s'\n", __FUNCTION__, entry[c].name);
+			r = false;
+		}
+		else
+		{
+			fprintf(stderr, "Parser::%s: unregistered command '%s'\n", __FUNCTION__, entry[c].name);
 		}
 	}
 	return r;

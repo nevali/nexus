@@ -9,10 +9,12 @@
 #include "Nexus/Room.hh"
 #include "Nexus/Variable.hh"
 
-using namespace Nexus;
+#include "Builder.hh"
+
+using namespace Nexus::Modules::Builder;
 
 bool
-Builtins::CREATE::execute(Actor *actor)
+CREATE::execute(Actor *actor)
 {
 	const char *name;
 
@@ -50,7 +52,7 @@ Builtins::CREATE::execute(Actor *actor)
 }
 
 bool
-Builtins::CREATE::createZone(Actor *actor, const char *name)
+CREATE::createZone(Actor *actor, const char *name)
 {
 	Zone *newZone, *parent = actor->zone();
 	Room *entrance;
@@ -141,7 +143,7 @@ Builtins::CREATE::createZone(Actor *actor, const char *name)
 }
 
 bool
-Builtins::CREATE::createRoom(Actor *actor, const char *name)
+CREATE::createRoom(Actor *actor, const char *name)
 {
 	Zone *parent = actor->zone();
 	Room *newRoom;
@@ -167,7 +169,7 @@ Builtins::CREATE::createRoom(Actor *actor, const char *name)
 }
 
 bool
-Builtins::CREATE::createPortal(Actor *actor, const char *name)
+CREATE::createPortal(Actor *actor, const char *name)
 {
 	Container *parent = actor->location();
 	Portal *newPortal;
@@ -192,7 +194,7 @@ Builtins::CREATE::createPortal(Actor *actor, const char *name)
 }
 
 bool
-Builtins::CREATE::createThing(Actor *actor, const char *name)
+CREATE::createThing(Actor *actor, const char *name)
 {
 	Thing *newThing;
 
