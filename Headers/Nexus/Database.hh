@@ -50,6 +50,7 @@ namespace Nexus
 		protected:
 			char *_basePath;
 			char *_pathBuf;
+			char *_tmpBuf;
 			size_t _pathBufSize;
 			json_t *_meta;
 			bool _dirty;

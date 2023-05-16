@@ -71,8 +71,9 @@ Database::Database(const char *path):
 {
 	fprintf(stderr, "Database::%s: starting with path '%s'\n", __FUNCTION__, path);
 	_basePath = strdup(path);
-	_pathBufSize = strlen(path) + 64;
+	_pathBufSize = strlen(path) + 128;
 	_pathBuf = (char *) calloc(1, _pathBufSize + 1);
+	_tmpBuf = (char *) calloc(1, _pathBufSize + 1);
 	snprintf(_pathBuf, _pathBufSize, "%s/db.json", _basePath);
 	fprintf(stderr, "Database::%s: attempting to load metadata from %s\n", __FUNCTION__, _pathBuf);
 	_meta = json_load_file(_pathBuf, 0, NULL);
@@ -107,6 +108,7 @@ Database::~Database()
 	json_decref(_zoneIndex);
 	free(_basePath);
 	free(_pathBuf);
+	free(_tmpBuf);
 }
 
 unsigned
@@ -358,19 +360,25 @@ Database::storeObject(json_t *obj)
 		return false;
 	}
 	snprintf(_pathBuf, _pathBufSize, "%s/%ld/%ld.json", _basePath, id, id);
+	snprintf(_tmpBuf, _pathBufSize, "%s/%ld/%ld.json.new", _basePath, id, id);
 //	fprintf(stderr, "Database::%s: saving to %s\n", __FUNCTION__, _pathBuf);
 	/* this is a shallow copy, because we only want to remove keys */
 	data = json_copy(obj);
 	json_object_del(data, "description");
 	json_object_del(data, "text");
-	if(json_dump_file(data, _pathBuf, JSON_INDENT(2)|JSON_ENSURE_ASCII|JSON_SORT_KEYS) < 0)
+	if(json_dump_file(data, _tmpBuf, JSON_INDENT(2)|JSON_ENSURE_ASCII|JSON_SORT_KEYS) < 0)
 	{
-		fprintf(stderr, "Database::%s: failed to write to %s: %s\n", __FUNCTION__, _pathBuf, strerror(errno));
+		fprintf(stderr, "Database::%s: failed to write to %s: %s\n", __FUNCTION__, _tmpBuf, strerror(errno));
 		json_decref(data);
 		return false;
 	}
-	_dirty = true;
 	json_decref(data);
+	if(rename(_tmpBuf, _pathBuf))
+	{
+		fprintf(stderr, "Database::%s: failed to rename %s to %s: %s\n", __FUNCTION__, _tmpBuf, _pathBuf, strerror(errno));
+		return false;
+	}
+	_dirty = true;
 	snprintf(_pathBuf, _pathBufSize, "%s/%ld/%ld.desc", _basePath, id, id);
 	if((sub = json_object_get(obj, "description")))
 	{	
@@ -398,15 +406,20 @@ bool
 Database::writeToFile(const char *pathname, const char *string)
 {
 	FILE *f;
-
-	f = fopen(pathname, "wb");
+	snprintf(_tmpBuf, _pathBufSize, "%s.new", pathname);
+	f = fopen(_tmpBuf, "wb");
 	if(!f)
 	{
-		fprintf(stderr, "Database::%s: failed to open %s for writing: %s\n", __FUNCTION__, pathname, strerror(errno));
+		fprintf(stderr, "Database::%s: failed to open %s for writing: %s\n", __FUNCTION__, _tmpBuf, strerror(errno));
 		return false;
 	}
 	fputs(string, f);
 	fclose(f);
+	if(rename(_tmpBuf, pathname))
+	{
+		fprintf(stderr, "Database::%s: failed to rename %s to %s: %s\n", __FUNCTION__, _tmpBuf, pathname, strerror(errno));
+		return false;
+	}
 	return true;
 }
 
