@@ -55,8 +55,10 @@ main(int argc, char **argv)
 	}
 	player->connect();
 	universe->checkpoint();
+	universe->resume();
 	while(player->connected())
 	{
+		universe->tick();
 		printf("%s> ", universe->name());
 		fflush(stdout);
 		if(NULL == fgets(cmdbuf, sizeof(cmdbuf) - 1, stdin))
@@ -67,6 +69,7 @@ main(int argc, char **argv)
 		/* this ensures that all changes are written to disk immediately */
 		universe->sync();
 	}
+	universe->suspend();
 	player->release();
 	universe->checkpoint();
 	universe->release();

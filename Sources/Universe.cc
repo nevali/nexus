@@ -27,13 +27,22 @@ Universe::Universe(Database *db):
 	_builtinsParser(NULL),
 	_defaultParser(NULL),
 	_maxId(0),
-	_modules(NULL)
+	_modules(NULL),
+	_now(0),
+	_launchTime(0),
+	_ageAtLaunch(0),
+	_age(0),
+	_running(true)
 {
+	gettimeofday(&_wallClock, NULL);
 	fprintf(stderr, "Universe::%s: universe is starting up\n", __FUNCTION__);
 	db->retain();
 	_meta = db->universe();
 	json_incref(_meta);
 	fprintf(stderr, "Universe::%s: universe version %u (current is %u)\n", __FUNCTION__, version(), UVERSION);
+	_ageAtLaunch = _age = json_integer_value(json_object_get(_meta, "age"));
+	updateClocks();
+	_launchTime = _now;
 	fprintf(stderr, "Universe::%s: creating Limbo\n", __FUNCTION__);
 	_limbo = new Limbo();
 	_limbo->setUniverse(this);
@@ -516,6 +525,8 @@ Universe::migrate(void)
 bool
 Universe::checkpoint(void)
 {
+	tick();
+	updateClocks();
 	if(_db)
 	{
 		syncObjects();
@@ -527,6 +538,7 @@ Universe::checkpoint(void)
 bool
 Universe::sync(void)
 {
+	tick();
 	if(_db)
 	{
 		syncObjects();

@@ -7,7 +7,7 @@ libNexus_la_SOURCES = \
 	Thing-Props.cc Thing-Flags.cc Thing-Status.cc Container.cc Actor.cc \
 	Player.cc Variable.cc Zone.cc Limbo.cc Database.cc \
 	Universe.cc Universe-Schema.cc Universe-Create.cc Universe-Modules.cc \
-	Parsers.cc Command.cc Tokens.cc Builtins.cc Module.cc \
+	Universe-Time.cc Parsers.cc Command.cc Tokens.cc Builtins.cc Module.cc \
 	ModuleImplementation.cc \
 	Builtins-COMMANDS.cc Builtins-ENABLE.cc Builtins-DISABLE.cc \
 	Builtins-MODULES.cc Builtins-QUIT.cc

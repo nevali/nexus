@@ -1,6 +1,8 @@
 #ifndef NEXUS_UNIVERSE_HH_
 # define NEXUS_UNIVERSE_HH_
 
+# include <sys/time.h>
+
 # include "WARP/Flux/Object.hh"
 # include "WARP/Flux/Array.hh"
 
@@ -11,6 +13,8 @@ namespace Nexus
 {
 	class Parser;
 	class Module;
+
+	typedef long long Ticks;
 
 	class Universe: public WARP::Flux::Object
 	{
@@ -49,9 +53,10 @@ namespace Nexus
 
 			virtual void acquire(Thing *object);
 			virtual void discard(Thing *object);
-		protected:
-			virtual bool migrateTo(unsigned version);
+		private:
+			bool migrateTo(unsigned version);
 			void syncObjects(void);
+			void updateClocks(void);
 			Thing *createObject(json_t *object, const char *name, bool allocId = false, Container *location = NULL) __attribute__ (( warn_unused_result ));
 			json_t *objectTemplate(const char *type) __attribute__ (( warn_unused_result ));
 			json_t *thingTemplate(void) __attribute__ (( warn_unused_result ));
@@ -102,6 +107,25 @@ namespace Nexus
 			virtual Variable *newVariable(const char *name = NULL, bool allocId = false, Container *location = NULL) __attribute__ (( warn_unused_result ));
 			virtual Parser *parserForCommand(Actor *actor, const char *commandLine) __attribute__ (( warn_unused_result ));
 			virtual Parser *builtinsParser(void) __attribute__ (( warn_unused_result ));
+			/* invoked to advance the Universe's clocks, if enough (real) time
+			 * has elapsed since the last invocation
+			 */
+			virtual Ticks tick(void);
+			/* suspend the universe (stop the passage of time) */
+			virtual void suspend(void);
+			/* resume the passage of time */
+			virtual void resume(void);
+			/* return whatever gettimeofday() returned at last tick */
+			virtual time_t wallTime(struct timeval *tv = NULL) const;
+			/* the wall time but in Ticks */
+			virtual Ticks now(void) const;
+			/* return the number of ticks per real second */
+			virtual unsigned ticksPerSecond(void) const;
+			/* the age of the Universe */
+			virtual Ticks age(void) const;
+			/* whether the Universe is running (ageing) */
+			virtual bool running(void) const;
+
 		protected:
 			Thing **_objects;
 			size_t _objectsSize;
@@ -115,6 +139,12 @@ namespace Nexus
 			Parser *_defaultParser;
 			Thing::ID _maxId;
 			ModuleList *_modules;
+			struct timeval _wallClock;
+			Ticks _now;
+			Ticks _launchTime;
+			Ticks _ageAtLaunch;
+			Ticks _age;
+			bool _running;
 	};
 }
 
