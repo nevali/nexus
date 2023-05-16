@@ -84,11 +84,11 @@ Universe::updateClocks(void)
 		*/
 		_age = _ageAtLaunch + (latest - _launchTime);
 		json_object_set_new(_meta, "age", json_integer(_age));
-		fprintf(stderr, "Universe::%s: RUNNING: now=%lld, step=%lld, age=%lld\n", __FUNCTION__, _now, step, _age);
+//		fprintf(stderr, "Universe::%s: RUNNING: now=%lld, step=%lld, age=%lld\n", __FUNCTION__, _now, step, _age);
 	}
 	else
 	{
-		fprintf(stderr, "Universe::%s: SUSPENDED: tv_sec=%lu, tv_usec=%lu, prev=%lld, now=%lld, step=%lld\n", __FUNCTION__, _wallClock.tv_sec, _wallClock.tv_usec, _now, latest, step);
+//		fprintf(stderr, "Universe::%s: SUSPENDED: tv_sec=%lu, tv_usec=%lu, prev=%lld, now=%lld, step=%lld\n", __FUNCTION__, _wallClock.tv_sec, _wallClock.tv_usec, _now, latest, step);
 	}
 	_now = latest;
 }
