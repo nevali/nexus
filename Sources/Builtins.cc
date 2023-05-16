@@ -141,10 +141,10 @@ BuiltinsParser::parse(Actor *who, const char *commandLine)
 		return NULL;
 	}
 	command = exact->constructor(this, tokens);
+	tokens->release();
 	if(!command)
 	{
 		fprintf(stderr, "BuiltinsParser::%s: constructor for command '%s' failed\n", __FUNCTION__, exact->name);
-		tokens->release();
 		return NULL;
 	}
 	/* parsing succeeded, return the Command so that it can be executed */

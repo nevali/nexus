@@ -13,6 +13,7 @@ Command::Command(Parser *parser, Tokens *tokens):
 	_parser(parser),
 	_tokens(tokens)
 {
+	_tokens->retain();
 	_parser->retain();
 	_universe = _parser->_universe;
 	_universe->retain();
