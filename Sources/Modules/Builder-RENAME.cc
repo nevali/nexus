@@ -11,14 +11,14 @@ RENAME::execute(Actor *actor)
 	Thing *thing;
 	const char *newName;
 
-	if(_argc < 2 || _argc > 3)
+	if(argc() < 2 || argc() > 3)
 	{
 		actor->send("Usage: @RENAME WHAT [NEW-NAME]\n");
 		return false;
 	}
-	if(_argc > 2)
+	if(argc() > 2)
 	{
-		newName = _argv[2];
+		newName = argv(2);
 		if(!newName[0])
 		{
 			newName = NULL;
@@ -28,9 +28,9 @@ RENAME::execute(Actor *actor)
 	{
 		newName = NULL;
 	}
-	if(!(thing = actor->resolveTarget(_argv[1])))
+	if(!(thing = actor->resolveTarget(argv(1))))
 	{
-		actor->sendf("Sorry, I can't find '%s'\n", _argv[1]);
+		actor->sendf("Sorry, I can't find '%s'\n", argv(1));
 		return false;
 	}
 	if(thing->setName(newName))

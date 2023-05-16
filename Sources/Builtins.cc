@@ -11,6 +11,7 @@
 #include "Nexus/Room.hh"
 #include "Nexus/Variable.hh"
 #include "Nexus/Portal.hh"
+#include "Nexus/Tokens.hh"
 
 using namespace Nexus;
 
@@ -42,8 +43,9 @@ BuiltinsParser::BuiltinsParser(Universe *universe):
 Command *
 BuiltinsParser::parse(Actor *who, const char *commandLine)
 {
-	char cmdbuf[32];
-	const char *start;
+	Tokens *tokens;
+	const char *cmdstr;
+	size_t cmdlen;
 	CommandEntry *partial, *exact;
 	Command *command;
 	bool clash;
@@ -58,36 +60,29 @@ BuiltinsParser::parse(Actor *who, const char *commandLine)
 	 * the '@' to the first whitespace OR forward-slash to the command
 	 * name
 	 */
-	if(!commandLine || *commandLine != '@')
+	tokens = new Tokens(commandLine);
+	cmdstr = tokens->raw(0);
+	if(!cmdstr || cmdstr[0] != '@')
 	{
+		tokens->release();
 		return NULL;
 	}
-	start = commandLine;
-	commandLine++;
-	for(c = 0; *commandLine && c < sizeof(cmdbuf) - 1; commandLine++)
-	{
-		if(!*commandLine || *commandLine == '/' || isblank(*commandLine) || *commandLine == '\r' || *commandLine == '\n')
-		{
-			break;
-		}
-		cmdbuf[c] = *commandLine;
-		c++;
-	}
-	cmdbuf[c] = 0;
-
+	/* skip the '@' */
+	cmdstr++;
+	cmdlen = strlen(cmdstr);
 	/* commands are partial-matched unless flagged as being full-match-only
 	 * an exact match always takes precedence
 	 */
 	for(c = 0; c < _ncommands; c++)
 	{
-		if(!strcasecmp(_commands[c].name, cmdbuf))
+		if(!strcasecmp(_commands[c].name, cmdstr))
 		{
 			exact = &(_commands[c]);
 			break;
 		}
 		if(!(_commands[c].flags & CommandEntry::UNAMBIGUOUS))
 		{
-			if(!strncasecmp(_commands[c].name, cmdbuf, strlen(cmdbuf)))
+			if(!strncasecmp(_commands[c].name, cmdstr, cmdlen))
 			{
 				if(partial)
 				{
@@ -107,7 +102,21 @@ BuiltinsParser::parse(Actor *who, const char *commandLine)
 		*/
 		if(clash)
 		{
-			who->sendf("Multiple command matches for '@%s':\n", cmdbuf);
+			bool first = true;
+			who->sendf("Multiple command matches for '@%s':\n  ", cmdstr);
+			for(c = 0; c < _ncommands; c++)
+			{
+				if(!(_commands[c].flags & CommandEntry::UNAMBIGUOUS))
+				{
+					if(!strncasecmp(_commands[c].name, cmdstr, cmdlen))
+					{
+						who->sendf("%s@%s", (first ? "" : ", "), _commands[c].name);
+						first = false;
+					}
+				}
+			}
+			who->send("\n");
+			tokens->release();
 			return NULL;
 		}
 		/* if there was exactly one partial match, use it */
@@ -117,7 +126,8 @@ BuiltinsParser::parse(Actor *who, const char *commandLine)
 		}
 		else
 		{
-			who->sendf("Sorry, the command '@%s' was not recognised.\n", cmdbuf);
+			who->sendf("Sorry, the command '@%s' was not recognised.\n", cmdstr);
+			tokens->release();
 			return NULL;
 		}
 	}
@@ -127,18 +137,14 @@ BuiltinsParser::parse(Actor *who, const char *commandLine)
 	if(!exact->constructor)
 	{
 		who->sendf("Sorry, the '@%s' command is not implemented.\n", exact->name);
+		tokens->release();
 		return NULL;
 	}
-	command = exact->constructor(this, start);
+	command = exact->constructor(this, tokens);
 	if(!command)
 	{
 		fprintf(stderr, "BuiltinsParser::%s: constructor for command '%s' failed\n", __FUNCTION__, exact->name);
-		return NULL;
-	}
-	/* now we have the Command instance, request it parse its arguments */
-	if(!command->parse(who))
-	{
-		command->release();
+		tokens->release();
 		return NULL;
 	}
 	/* parsing succeeded, return the Command so that it can be executed */

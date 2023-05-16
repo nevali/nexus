@@ -17,19 +17,19 @@ typedef struct
 bool
 HELP::execute(Actor *actor)
 {
-	if(_argc < 2)
+	if(argc() < 2)
 	{
 		return intro(actor);
 	}
-	if(!strcasecmp(_argv[1], "intro") || !strcasecmp(_argv[1], "introduction") || !strcasecmp(_argv[1], "contents"))
+	if(!strcasecmp(argv(1), "intro") || !strcasecmp(argv(1), "introduction") || !strcasecmp(argv(1), "contents"))
 	{
 		return intro(actor);
 	}
-	if(!strcasecmp(_argv[1], "disclaim") || !strcasecmp(_argv[1], "disclaimer") || !strcasecmp(_argv[1], "disclaimers"))
+	if(!strcasecmp(argv(1), "disclaim") || !strcasecmp(argv(1), "disclaimer") || !strcasecmp(argv(1), "disclaimers"))
 	{
 		return disclaimers(actor);
 	}
-	actor->sendf("Sorry, I can't find an Operator's Guide topic named '%s'\n", _argv[1]);
+	actor->sendf("Sorry, I can't find an Operator's Guide topic named '%s'\n", argv(1));
 	return false;
 }
 
@@ -94,7 +94,7 @@ HELP::intro(Actor *actor)
 bool
 HELP::disclaimers(Actor *actor)
 {
-	if(_argc >= 3)
+	if(argc() >= 3)
 	{
 		actor->send("Sorry, that passcode is not correct. You will continue to be opted in to all features.\n"
 			"Please note that no responsibility can be taken for death or inury as a\n"

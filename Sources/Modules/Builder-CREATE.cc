@@ -18,36 +18,36 @@ CREATE::execute(Actor *actor)
 {
 	const char *name;
 
-	if(_argc < 2 || _argc > 3 || _argv[1][0] != '/')
+	if(argc() < 2 || argc() > 3 || argv(1)[0] != '/')
 	{
 		actor->send("Usage: @CREATE /TYPE [NAME]\n");
 		return false;
 	}
-	if(_argc > 2)
+	if(argc() > 2)
 	{
-		name = _argv[2];
+		name = argv(2);
 	}
 	else
 	{
 		name = NULL;
 	}
-	if(!strcasecmp(_argv[1], "/thing"))
+	if(!strcasecmp(argv(1), "/thing"))
 	{
 		return createThing(actor, name);
 	}
-	if(!strcasecmp(_argv[1], "/zone"))
+	if(!strcasecmp(argv(1), "/zone"))
 	{
 		return createZone(actor, name);
 	}
-	if(!strcasecmp(_argv[1], "/room"))
+	if(!strcasecmp(argv(1), "/room"))
 	{
 		return createRoom(actor, name);
 	}
-	if(!strcasecmp(_argv[1], "/portal"))
+	if(!strcasecmp(argv(1), "/portal"))
 	{
 		return createPortal(actor, name);
 	}
-	actor->sendf("Sorry, I don't know how to create a '%s'\n", _argv[1] + 1);
+	actor->sendf("Sorry, I don't know how to create a '%s'\n", argv(1) + 1);
 	return false;
 }
 

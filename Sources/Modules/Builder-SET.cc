@@ -11,23 +11,23 @@ SET::execute(Actor *actor)
 	Thing *thing;
 	const char *property, *newValue;
 
-	if(_argc < 3 || _argc > 4)
+	if(argc() < 3 || argc() > 4)
 	{
 		actor->send("Usage: @SET TARGET PROPERTY [NEW-VALUE]\n");
 		return false;
 	}
-	property = _argv[2];
-	if(_argc > 3)
+	property = argv(2);
+	if(argc() > 3)
 	{
-		newValue = _argv[3];
+		newValue = argv(3);
 	}
 	else
 	{
 		newValue = NULL;
 	}
-	if(!(thing = actor->resolveTarget(_argv[1])))
+	if(!(thing = actor->resolveTarget(argv(1))))
 	{
-		actor->sendf("Sorry, I can't find '%s'\n", _argv[1]);
+		actor->sendf("Sorry, I can't find '%s'\n", argv(1));
 		return false;
 	}
 	if(thing->set(actor, property, newValue))

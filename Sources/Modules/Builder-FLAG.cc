@@ -14,25 +14,25 @@ FLAG::execute(Actor *actor)
 	const char *flag;
 	bool onOff;
 
-	if(_argc < 3 || _argc > 4)
+	if(argc() < 3 || argc() > 4)
 	{
 		actor->send("Usage: @FLAG TARGET FLAG [on|off]\n");
 		return false;
 	}
-	flag = _argv[2];
-	if(_argc > 3)
+	flag = argv(2);
+	if(argc() > 3)
 	{
-		if(!strcasecmp(_argv[3], "on") || !strcasecmp(_argv[3], "true"))
+		if(!strcasecmp(argv(3), "on") || !strcasecmp(argv(3), "true"))
 		{
 			onOff = true;
 		}
-		else if(!strcasecmp(_argv[3], "off") || !strcasecmp(_argv[3], "false"))
+		else if(!strcasecmp(argv(3), "off") || !strcasecmp(argv(3), "false"))
 		{
 			onOff = false;
 		}
 		else
 		{
-			actor->sendf("Sorry, I don't understand '%s'\n", _argv[3]);
+			actor->sendf("Sorry, I don't understand '%s'\n", argv(3));
 			return false;
 		}
 	}
@@ -40,9 +40,9 @@ FLAG::execute(Actor *actor)
 	{
 		onOff = true;
 	}
-	if(!(thing = actor->resolveTarget(_argv[1])))
+	if(!(thing = actor->resolveTarget(argv(1))))
 	{
-		actor->sendf("Sorry, I can't find '%s'\n", _argv[1]);
+		actor->sendf("Sorry, I can't find '%s'\n", argv(1));
 		return false;
 	}
 	if(thing->flag(actor, flag, onOff))

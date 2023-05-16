@@ -13,14 +13,14 @@ GO::execute(Actor *actor)
 	bool r;
 
 	r = false;
-	if(_argc != 2)
+	if(argc() != 2)
 	{
 		actor->send("Usage: @GO WHERE\n");
 		return false;
 	}
-	if(!(dest = actor->resolveTarget(_argv[1])))
+	if(!(dest = actor->resolveTarget(argv(1))))
 	{
-		actor->sendf("Sorry, I can't find '%s'\n", _argv[1]);
+		actor->sendf("Sorry, I can't find '%s'\n", argv(1));
 		return false;
 	}
 	r = false;

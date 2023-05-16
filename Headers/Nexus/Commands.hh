@@ -11,6 +11,7 @@ namespace Nexus
 	class Actor;
 	class Command;
 	class Parser;
+	class Tokens;
 
 	struct CommandEntry
 	{
@@ -21,7 +22,7 @@ namespace Nexus
 			UNAMBIGUOUS = (1<<1)
 		} Flags;
 
-		typedef Command *(*Constructor)(Parser *parser, const char *commandLine);
+		typedef Command *(*Constructor)(Parser *parser, Tokens *tokens);
 
 		/* the name of the command */
 		const char *name;
@@ -83,25 +84,25 @@ namespace Nexus
 	class Command: public WARP::Flux::Object
 	{
 		protected:
-			Command(Parser *parser, const char *commandLine);
+			Command(Parser *parser, Tokens *tokens);
 			virtual ~Command();
 		public:
-			virtual bool parse(Actor *actor);
 			virtual bool execute(Actor *actor) = 0;
+		protected:
+			int argc(void) const;
+			const char *argv(size_t index) const;
 		protected:
 			Parser *_parser;
 			Universe *_universe;
-			char *_argsBuf;
-			int _argc;
-			char *_argv[16];
+			Tokens *_tokens;
 	};
 
 # define DECLARE_COMMAND_(name, extra) \
 	class name: public Command \
 	{ \
 		public: \
-			static Command *construct(Parser *parser, const char *commandLine) { return new name(parser, commandLine); } \
-			name(Parser *parser, const char *commandLine): Command(parser, commandLine) { } \
+			static Command *construct(Parser *parser, Tokens *tokens) { return new name(parser, tokens); } \
+			name(Parser *parser, Tokens *tokens): Command(parser, tokens) { } \
 			virtual bool execute(Actor *actor); \
 			extra \
 	}
