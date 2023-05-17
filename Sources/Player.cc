@@ -19,6 +19,12 @@ Player::send(const char *str)
 }
 
 void
+Player::flush(void)
+{
+	fflush(stdout);
+}
+
+void
 Player::connect(void)
 {
 	Container *loc;
@@ -43,6 +49,7 @@ Player::connect(void)
 	setLocation(loc);
 	loc->look(this);
 	loc->release();
+	sendPrompt();
 }
 
 void
@@ -116,7 +123,14 @@ Player::bufferFilled(WARP::Flux::Object *sender, WARP::Flux::Buffer *buffer, cha
 	{
 		_universe->sync();
 	}
-//	_showPrompt = true;
+	sendPrompt();
+}
+
+void
+Player::sendPrompt(void)
+{
+	sendf("%s> ", _universe->name());
+	flush();
 }
 
 void

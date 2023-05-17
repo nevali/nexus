@@ -23,11 +23,13 @@ namespace Nexus
 
 			Player(json_t *source): Actor(source), _connected(false), _inputBuffer(NULL), _channel(NULL) {}
 			virtual ~Player();
+			virtual void sendPrompt(void);
 		public:
 			virtual TypeID typeId(void) const { return PLAYER; }
 			virtual bool isPlayer(void) const { return true; }
 			
 			virtual void send(const char *string);
+			virtual void flush(void);
 			virtual void connect(void);
 			virtual void connect(WARP::Flux::Buffer *inputBuffer);
 			virtual void connect(WARP::Flux::Channel *channel);
