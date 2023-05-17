@@ -518,23 +518,41 @@ bool
 Database::checkpoint(void)
 {
 	snprintf(_pathBuf, _pathBufSize, "%s/db.json", _basePath);
+	snprintf(_tmpBuf, _pathBufSize, "%s/db.json.new", _basePath);
 	json_object_set_new(_meta, "lastUpdate", json_integer(time(NULL)));
 //	fprintf(stderr, "Database::%s: saving metadata to %s\n", __FUNCTION__, _pathBuf);
-	if(json_dump_file(_meta, _pathBuf, JSON_INDENT(2)|JSON_ENSURE_ASCII|JSON_SORT_KEYS) < 0)
+	if(json_dump_file(_meta, _tmpBuf, JSON_INDENT(2)|JSON_ENSURE_ASCII|JSON_SORT_KEYS) < 0)
 	{
-		fprintf(stderr, "Database::%s: failed to write to %s: %s\n", __FUNCTION__, _pathBuf, strerror(errno));
+		fprintf(stderr, "Database::%s: failed to write to %s: %s\n", __FUNCTION__, _tmpBuf, strerror(errno));
+		return false;
+	}
+	if(rename(_tmpBuf, _pathBuf))
+	{
+		fprintf(stderr, "Database::%s: failed to rename %s to %s: %s\n", __FUNCTION__, _tmpBuf, _pathBuf, strerror(errno));
 		return false;
 	}
 	snprintf(_pathBuf, _pathBufSize, "%s/players.json", _basePath);
-	if(json_dump_file(_playerIndex, _pathBuf, 0) < 0)
+	snprintf(_tmpBuf, _pathBufSize, "%s/players.json.new", _basePath);
+	if(json_dump_file(_playerIndex, _tmpBuf, 0) < 0)
 	{
-		fprintf(stderr, "Database::%s: failed to write to %s: %s\n", __FUNCTION__, _pathBuf, strerror(errno));
+		fprintf(stderr, "Database::%s: failed to write to %s: %s\n", __FUNCTION__, _tmpBuf, strerror(errno));
+		return false;
+	}
+	if(rename(_tmpBuf, _pathBuf))
+	{
+		fprintf(stderr, "Database::%s: failed to rename %s to %s: %s\n", __FUNCTION__, _tmpBuf, _pathBuf, strerror(errno));
 		return false;
 	}
 	snprintf(_pathBuf, _pathBufSize, "%s/zones.json", _basePath);
-	if(json_dump_file(_zoneIndex, _pathBuf, 0) < 0)
+	snprintf(_tmpBuf, _pathBufSize, "%s/zones.json.new", _basePath);
+	if(json_dump_file(_zoneIndex, _tmpBuf, 0) < 0)
 	{
-		fprintf(stderr, "Database::%s: failed to write to %s: %s\n", __FUNCTION__, _pathBuf, strerror(errno));
+		fprintf(stderr, "Database::%s: failed to write to %s: %s\n", __FUNCTION__, _tmpBuf, strerror(errno));
+		return false;
+	}
+	if(rename(_tmpBuf, _pathBuf))
+	{
+		fprintf(stderr, "Database::%s: failed to rename %s to %s: %s\n", __FUNCTION__, _tmpBuf, _pathBuf, strerror(errno));
 		return false;
 	}
 	_dirty = false;
