@@ -22,6 +22,7 @@ CommandEntry Builder::_commands[] = {
 	{ "RENAME", CommandEntry::NONE, RENAME::construct, "Change an object's name" },
 	{ "SET", CommandEntry::NONE, SET::construct, "Change an object's properties" },
 	{ "TELEPORT", CommandEntry::NONE, TELEPORT::construct, "Move an object to a location" },
+	{ "WHO", CommandEntry::NONE, WHO::construct, "List active actors, players, and robots" },
 	{ NULL, CommandEntry::NONE, NULL, NULL }
 };
 

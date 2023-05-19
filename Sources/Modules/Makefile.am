@@ -3,7 +3,7 @@ pkglib_LTLIBRARIES = Builder.la Comms.la Debug.la Editor.la Guide.la
 Builder_la_SOURCES = Builder.hh Builder.cc \
 	Builder-CREATE.cc Builder-DESTROY.cc Builder-EXAMINE.cc Builder-FLAG.cc \
 	Builder-GO.cc Builder-LIST.cc Builder-LOOK.cc Builder-RENAME.cc \
-	Builder-SET.cc Builder-TELEPORT.cc
+	Builder-SET.cc Builder-TELEPORT.cc Builder-WHO.cc
 
 Builder_la_LDFLAGS = -avoid-version -module -no-undefined -rpath ${pkglibdir} -export-symbols-regex '^nexusModuleImplementation$$'
 Builder_la_LIBADD = ../libNexus.la

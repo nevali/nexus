@@ -11,6 +11,8 @@ namespace Nexus
 			friend class Thing;
 
 			Actor(json_t *source): Container(source) {}
+			virtual bool activate(void);
+			virtual bool deactivate(void);
 		public:
 			virtual TypeID typeId(void) const { return ACTOR; }
 			virtual bool isActor(void) const { return true; }

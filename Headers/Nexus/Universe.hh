@@ -53,6 +53,10 @@ namespace Nexus
 
 			virtual void acquire(Thing *object);
 			virtual void discard(Thing *object);
+		protected:
+			friend class Actor;
+			virtual void activated(Actor *actor);
+			virtual void deactivated(Actor *actor);
 		private:
 			bool migrateTo(unsigned version);
 			void syncObjects(void);
@@ -125,8 +129,9 @@ namespace Nexus
 			virtual Ticks age(void) const;
 			/* whether the Universe is running (ageing) */
 			virtual bool running(void) const;
-
-		protected:
+			/* return the list of active Actors */
+			virtual WARP::Flux::TArray<Actor> *actors(void) __attribute__ (( warn_unused_result ));
+		private:
 			Thing **_objects;
 			size_t _objectsSize;
 			Database *_db;
@@ -145,6 +150,7 @@ namespace Nexus
 			Ticks _ageAtLaunch;
 			Ticks _age;
 			bool _running;
+			WARP::Flux::TArray<Actor> *_actors;
 	};
 }
 

@@ -8,6 +8,30 @@
 
 using namespace Nexus;
 
+/* Activate this actor */
+bool
+Actor::activate(void)
+{
+	if(_universe)
+	{
+		_universe->activated(this);
+		return true;
+	}
+	return false;
+}
+
+/* Deactivate this actor */
+bool
+Actor::deactivate(void)
+{
+	if(_universe)
+	{
+		_universe->deactivated(this);
+		return true;
+	}
+	return false;
+}
+
 /* Perform a command */
 bool
 Actor::perform(const char *commandLine)

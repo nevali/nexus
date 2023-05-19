@@ -38,6 +38,7 @@ Player::connect(void)
 		}
 	}
 	sendf("\nGreetings, %s!\n\n", displayName());
+	activate();
 	_connected = true;
 	loc = location();
 	if(!loc)
@@ -87,6 +88,7 @@ Player::disconnect(void)
 {
 	Container *loc;
 
+	deactivate();
 	_connected = false;
 	loc = location();
 	if(loc)
@@ -117,8 +119,9 @@ Player::bufferFilled(WARP::Flux::Object *sender, WARP::Flux::Buffer *buffer, cha
 	(void) sender;
 	(void) buffer;
 	(void) base;
-
-	fprintf(stderr, "Player::%s() %ld bytes available in buffer\n", __FUNCTION__, *nbytes);
+	(void) nbytes;
+	
+//	fprintf(stderr, "Player::%s() %ld bytes available in buffer\n", __FUNCTION__, *nbytes);
 	/* assume for now there's an EOL */
 	perform(base);
 	if(_universe)
