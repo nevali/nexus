@@ -97,12 +97,14 @@ Player::disconnect(void)
 	if(_channel)
 	{
 		fprintf(stderr, "Player::%s: releasing Channel\n", __FUNCTION__);
+		_channel->clearChannelDelegate(_inputBuffer);
 		_channel->release();
 		_channel = NULL;
 	}
 	if(_inputBuffer)
 	{
 		fprintf(stderr, "Player::%s: releasing Buffer\n", __FUNCTION__);
+		_inputBuffer->clearBufferDelegate(this);
 		_inputBuffer->release();
 		_inputBuffer = NULL;
 	}
