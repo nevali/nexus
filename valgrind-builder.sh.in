@@ -1,0 +1,6 @@
+#! /bin/sh
+
+abs_top_builddir='@abs_top_builddir@'
+debugger=valgrind
+arg="--track-origins=yes --leak-check=full --"
+${abs_top_builddir}/libtool --mode=execute ${debugger} $arg "${abs_top_builddir}/Tools/builder/builder" "$@"

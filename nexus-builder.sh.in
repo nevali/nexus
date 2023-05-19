@@ -1,0 +1,4 @@
+#! /bin/sh
+
+abs_top_builddir='@abs_top_builddir@'
+${abs_top_builddir}/libtool --mode=execute -- "${abs_top_builddir}/Tools/builder/builder" "$@"

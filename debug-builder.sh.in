@@ -1,0 +1,11 @@
+#! /bin/sh
+
+abs_top_builddir='@abs_top_builddir@'
+if test x"$(uname -s 2>/dev/null)" = xDarwin ; then
+	debugger=$(xcrun -f lldb)
+	arg="--"
+else
+	debugger=gdb
+	arg="--args"
+fi
+${abs_top_builddir}/libtool --mode=execute ${debugger} $arg "${abs_top_builddir}/Tools/builder/builder" "$@"

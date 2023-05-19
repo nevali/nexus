@@ -41,3 +41,5 @@ stamp-h*
 /libtool
 /ltmain.sh
 /debug-builder
+/valgrind-builder
+!/*.sh.in
