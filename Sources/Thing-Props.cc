@@ -228,6 +228,19 @@ Thing::setDescription(const char *newDesc)
 	return true;
 }
 
+Thing::ID
+Thing::ownerId(void) const
+{
+	json_t *value = json_object_get(_obj, "owner");
+
+	if(value)
+	{
+		return json_integer_value(value);
+	}
+	return ID_INVALID;
+}
+
+
 Actor *
 Thing::owner(void)
 {
@@ -259,6 +272,18 @@ Thing::setOwner(Thing *owner)
 	}
 	markDirty();
 	return true;
+}
+
+Thing::ID
+Thing::locationId(void) const
+{
+	json_t *value = json_object_get(_obj, "location");
+
+	if(value)
+	{
+		return json_integer_value(value);
+	}
+	return ID_INVALID;
 }
 
 Container *
@@ -353,6 +378,25 @@ Thing::zone(void)
 		return loc->asZone();
 	}
 	z = loc->zone();
+	loc->release();
+	return z;
+}
+
+Thing::ID
+Thing::zoneId(void) const
+{
+	Thing *loc;
+	ID z;
+	
+	if(!(loc = location()))
+	{
+		return NULL;
+	}
+	if(loc->isZone())
+	{
+		return loc->id();
+	}
+	z = loc->zoneId();
 	loc->release();
 	return z;
 }

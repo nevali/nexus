@@ -17,12 +17,12 @@ TELEPORT::execute(Actor *actor)
 		actor->send("Usage: @TELEPORT WHAT WHERE\n");
 		return false;
 	}
-	if(!(thing = actor->resolveTarget(argv(1))))
+	if(!(thing = actor->resolveIdOrBuiltin(argv(1))))
 	{
 		actor->sendf("Sorry, I can't find '%s'\n", argv(1));
 		return false;
 	}
-	if(!(dest = actor->resolveTarget(argv(2))))
+	if(!(dest = actor->resolveIdOrBuiltin(argv(2))))
 	{
 		actor->sendf("Sorry, I can't find '%s'\n", argv(2));
 		thing->release();

@@ -18,7 +18,8 @@ GO::execute(Actor *actor)
 		actor->send("Usage: @GO WHERE\n");
 		return false;
 	}
-	if(!(dest = actor->resolveTarget(argv(1))))
+	/* XXX resolveDestination */
+	if(!(dest = actor->resolveIdOrBuiltin(argv(1))))
 	{
 		actor->sendf("Sorry, I can't find '%s'\n", argv(1));
 		return false;

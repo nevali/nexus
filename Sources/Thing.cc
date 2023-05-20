@@ -208,33 +208,3 @@ Thing::database(void) const
 {
 	return _db;
 }
-
-/* resolve a target relative to this object */
-Thing *
-Thing::resolveTarget(const char *target)
-{
-	if(!target || !*target)
-	{
-		return NULL;
-	}
-	if(!strcasecmp(target, "here"))
-	{
-		return location();
-	}
-	if(!strcasecmp(target, "me"))
-	{
-		retain();
-		return this;
-	}
-	if(target[0] == '#')
-	{
-		ID id;
-
-		id = ID_INVALID;
-		if(_universe && sscanf(target, "#%ld", &id) == 1)
-		{
-			return _universe->thingFromId(id);
-		}
-	}
-	return NULL;
-}

@@ -22,7 +22,7 @@ LOOK::execute(Actor *actor)
 		thing->release();
 		return true;
 	}
-	thing = actor->resolveTarget(argv(1));
+	thing = actor->resolveIdOrBuiltin(argv(1));
 	if(!thing)
 	{
 		actor->sendf("Sorry, I can't find '%s'\n", argv(1));

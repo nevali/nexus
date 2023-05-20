@@ -26,7 +26,8 @@ namespace Nexus
 			/* the zone of a Zone is always itself, even if it's contained
 			 * by another Zone
 			 */
-			virtual Zone *zone(void) __attribute__ (( warn_unused_result )) { retain(); return this; }
+			virtual Zone *zone(void) __attribute__ (( warn_unused_result )) { retain(); return (Zone *) this; }
+			virtual ID zoneId(void) const { return id(); }
 			virtual bool nameIsSuitable(const char *newName) const;
 			/* locate the channel named 'name' in this zone */
 			virtual Channel *channelWithName(const char *name) __attribute__ (( warn_unused_result ));

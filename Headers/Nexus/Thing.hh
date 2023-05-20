@@ -152,14 +152,15 @@ namespace Nexus
 			virtual bool isCanonicallyNamed(const char *name) const;
 			virtual const char *description(void) const;
 			virtual bool setDescription(const char *newDesc);
+			virtual ID locationId(void) const;
 			virtual Container *location(void) const __attribute__ (( warn_unused_result ));
 			virtual bool setLocation(ID loc);
 			virtual bool setLocation(Container *loc);
+			virtual ID ownerId(void) const;
 			virtual Actor *owner(void) __attribute__ (( warn_unused_result ));
 			virtual bool setOwner(Thing *owner);
+			virtual ID zoneId(void) const;
 			virtual Zone *zone(void) __attribute__ (( warn_unused_result ));
-			virtual Thing *resolveTarget(const char *target) __attribute__ (( warn_unused_result ));
-
 		public:
 			/* send: directs the supplied string to the object */
 			virtual void send(const char *string);

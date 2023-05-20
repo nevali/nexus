@@ -42,7 +42,6 @@ Channel *
 Zone::channelWithName(const char *name)
 {
 	char cname[Database::MAX_CANON_NAME + 1];
-	const char *p;
 	size_t c;
 
 	Database::canonicalise(cname, sizeof(cname), name);
@@ -53,14 +52,11 @@ Zone::channelWithName(const char *name)
 	for(c = 0; c < _ncontents; c++)
 	{
 		if(_contents[c] &&
-			_contents[c]->isChannel())
+			_contents[c]->isChannel() &&
+			_contents[c]->isCanonicallyNamed(cname))
 		{
-			/* XXX Thing::nameMatches() ?? */
-			if((p = _contents[c]->canonicalName()) && !strcmp(p, cname))
-			{
-				_contents[c]->retain();
-				return _contents[c]->asChannel();
-			}
+			_contents[c]->retain();
+			return _contents[c]->asChannel();
 		}
 	}
 	return NULL;

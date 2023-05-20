@@ -258,3 +258,134 @@ Actor::disconnectFromChannel(Channel *chan)
 {
 	return chan->disconnect(this);
 }
+
+/* Object resolution */
+
+Thing *
+Actor::resolveIdOrBuiltin(const char *target)
+{
+	::debugf("Actor::%s: resolving '%s'\n", __FUNCTION__, target);
+	if(!target || !*target)
+	{
+		return NULL;
+	}
+	if(!strcasecmp(target, "here"))
+	{
+		return location();
+	}
+	if(!strcasecmp(target, "me"))
+	{
+		retain();
+		return this;
+	}
+	if(!strcasecmp(target, "zone"))
+	{
+		return zone();
+	}
+	if(target[0] == '#')
+	{
+		ID id;
+
+		id = ID_INVALID;
+		if(_universe && sscanf(target, "#%ld", &id) == 1)
+		{
+			return _universe->thingFromId(id);
+		}
+	}
+	return NULL;
+}
+
+Container *
+Actor::resolveDestination(const char *str)
+{
+	::debugf("Actor::%s: resolving '%s'\n", __FUNCTION__, str);
+	if(!str)
+	{
+		return NULL;
+	}
+	if(!strcasecmp(str, "here"))
+	{
+		return location();
+	}
+	return NULL;
+}
+
+Player *
+Actor::resolvePlayer(const char *name)
+{
+	::debugf("Actor::%s: resolving '%s'\n", __FUNCTION__, name);
+
+	return NULL;
+}
+
+Player *
+Actor::resolveAnyPlayer(const char *name)
+{
+	::debugf("Actor::%s: resolving '%s'\n", __FUNCTION__, name);
+
+	return NULL;
+}
+
+Actor *
+Actor::resolveActor(const char *name)
+{
+	::debugf("Actor::%s: resolving '%s'\n", __FUNCTION__, name);
+
+	return NULL;
+}
+
+Zone *
+Actor::resolveZone(const char *name)
+{
+	::debugf("Actor::%s: resolving '%s'\n", __FUNCTION__, name);
+
+	return NULL;
+}
+
+Channel *
+Actor::resolveChannel(const char *name)
+{
+	::debugf("Actor::%s: resolving '%s'\n", __FUNCTION__, name);
+
+	return NULL;
+}
+
+Thing *
+Actor::resolveCarried(const char *name)
+{
+	::debugf("Actor::%s: resolving '%s'\n", __FUNCTION__, name);
+
+	return NULL;
+}
+
+Container *
+Actor::resolveLocation(const char *name)
+{
+	::debugf("Actor::%s: resolving '%s'\n", __FUNCTION__, name);
+
+	return NULL;
+}
+
+Thing *
+Actor::resolveNearby(const char *name)
+{
+	::debugf("Actor::%s: resolving '%s'\n", __FUNCTION__, name);
+
+	return NULL;
+}
+
+Executable *
+Actor::resolveExecutable(const char *name)
+{
+	::debugf("Actor::%s: resolving '%s'\n", __FUNCTION__, name);
+
+	return NULL;
+}
+
+Thing *
+Actor::resolveByType(Thing::TypeID type, const char *name)
+{
+	::debugf("Actor::%s: resolving object by type '%c': '%s'\n", __FUNCTION__, type, name);
+
+	return NULL;
+}

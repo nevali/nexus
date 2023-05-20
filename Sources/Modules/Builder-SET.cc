@@ -25,7 +25,7 @@ SET::execute(Actor *actor)
 	{
 		newValue = NULL;
 	}
-	if(!(thing = actor->resolveTarget(argv(1))))
+	if(!(thing = actor->resolveIdOrBuiltin(argv(1))))
 	{
 		actor->sendf("Sorry, I can't find '%s'\n", argv(1));
 		return false;
