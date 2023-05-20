@@ -1,12 +1,15 @@
 #include <cstdio>
 #include <cstring>
 
+#include "WARP/Flux/Diagnostics.hh"
+
 #include "Nexus/Container.hh"
 #include "Nexus/Actor.hh"
 #include "Nexus/Database.hh"
 #include "Nexus/Universe.hh"
 
 using namespace Nexus;
+using namespace WARP::Flux::Diagnostics;
 
 Container::Container(json_t *obj):
 	Thing(obj),
@@ -21,7 +24,7 @@ Container::~Container()
 	{
 		if(_contents[n])
 		{
-			fprintf(stderr, "Container<%p>::%s: releasing contained #%ld%c\n", this, __FUNCTION__, _contents[n]->id(), _contents[n]->typeChar());
+			debugf("Container<%p>::%s: releasing contained #%ld%c\n", this, __FUNCTION__, _contents[n]->id(), _contents[n]->typeChar());
 			_contents[n]->release();
 		}
 	}
@@ -106,16 +109,16 @@ Container::unpack(void)
 
 	updateIdent();
 	updateFlags();
-//	fprintf(stderr, "Container<%p>::%s: unpacking %s (%s)\n", this, __FUNCTION__, name(), ident());
+//	debugf("Container<%p>::%s: unpacking %s (%s)\n", this, __FUNCTION__, name(), ident());
 	contents = json_object_get(_obj, "contents");
 	if(!contents)
 	{
-		fprintf(stderr, "- object has no contents\n");
+		debugf("- object has no contents\n");
 		return;
 	}
 	if(!json_is_array(contents))
 	{
-		fprintf(stderr, "- object.contents is not an array\n");
+		debugf("- object.contents is not an array\n");
 		return;
 	}
 	expandContents(json_array_size(contents));
@@ -126,19 +129,19 @@ Container::unpack(void)
 
 		if(!json_is_integer(value))
 		{
-			fprintf(stderr, "- entry #%lu is not an integer\n", index);
+			debugf("- entry #%lu is not an integer\n", index);
 			continue;
 		}
 		id = (ID) json_integer_value(value);
 		thing = _universe->thingFromId(id);
 		if(!thing)
 		{
-			fprintf(stderr, "- failed to load thing ID #%ld\n", id);
+			debugf("- failed to load thing ID #%ld\n", id);
 			continue;
 		}
 		/* invokes old-location->remove(thing) and this->add(thing) */
 		thing->setLocation(this);
-		fprintf(stderr, "Container<%p>::%s: unpacked %s (%s)\n", this, __FUNCTION__, thing->name(), thing->ident());
+		debugf("Container<%p>::%s: unpacked %s (%s)\n", this, __FUNCTION__, thing->name(), thing->ident());
 		thing->release();
 	}
 }
@@ -154,7 +157,7 @@ Container::add(Thing *thing)
 	{
 		return;
 	}
-//	fprintf(stderr, "Container<%p>::%s: adding %s (#%ld%c)\n", this, __FUNCTION__, thing->name(), thing->id(), thing->typeChar());
+//	debugf("Container<%p>::%s: adding %s (#%ld%c)\n", this, __FUNCTION__, thing->name(), thing->id(), thing->typeChar());
 	if(!(carray = json_object_get(_obj, "contents")))
 	{
 		carray = json_array();
@@ -177,7 +180,7 @@ Container::add(Thing *thing)
 	{
 		if(_contents[c] == thing)
 		{
-//			fprintf(stderr, "- already part of this object's contents\n");
+//			debugf("- already part of this object's contents\n");
 			return;
 		}
 	}
@@ -185,7 +188,7 @@ Container::add(Thing *thing)
 	{
 		if(!_contents[c])
 		{
-//			fprintf(stderr, "- adding at position %lu\n", c);
+//			debugf("- adding at position %lu\n", c);
 			thing->retain();
 			_contents[c] = thing;
 			_status |= DIRTY;
@@ -197,7 +200,7 @@ Container::add(Thing *thing)
 	{
 		abort();
 	}
-//	fprintf(stderr, "- adding at final position %lu\n", c);
+//	debugf("- adding at final position %lu\n", c);
 	thing->retain();
 	_contents[c] = thing;
 	_status |= DIRTY;
@@ -211,7 +214,7 @@ Container::remove(Thing *thing)
 	size_t index;
 	bool found;
 
-//	fprintf(stderr, "Container<%p>::%s: removing %s (#%ld%c)\n", this, __FUNCTION__, thing->name(), thing->id(), thing->typeChar());
+//	debugf("Container<%p>::%s: removing %s (#%ld%c)\n", this, __FUNCTION__, thing->name(), thing->id(), thing->typeChar());
 	if((carray = json_object_get(_obj, "contents")))
 	{
 		found = false;
@@ -232,7 +235,7 @@ Container::remove(Thing *thing)
 	{
 		if(_contents[c] == thing)
 		{
-//			fprintf(stderr, "- removing from position %lu\n", c);
+//			debugf("- removing from position %lu\n", c);
 			_contents[c] = NULL;
 			_status |= DIRTY;
 			thing->release();
@@ -250,7 +253,7 @@ Container::expandContents(size_t newSize)
 	{
 		return;
 	}
-//	fprintf(stderr, "Container<%p>::%s: expanding contents to %lu\n", this, __FUNCTION__, newSize);
+//	debugf("Container<%p>::%s: expanding contents to %lu\n", this, __FUNCTION__, newSize);
 	p = (Thing **) realloc(_contents, sizeof(Thing *) * newSize);
 	if(!p)
 	{

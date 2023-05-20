@@ -3,10 +3,13 @@
 
 #include <jansson.h>
 
+#include "WARP/Flux/Diagnostics.hh"
+
 #include "Nexus/Universe.hh"
 #include "Nexus/Module.hh"
 
 using namespace Nexus;
+using namespace WARP::Flux::Diagnostics;
 
 /* result is retained for you */
 Universe::ModuleList *
@@ -86,16 +89,16 @@ Universe::ModuleList::activate(void)
 	{
 		if((s = json_string_value(value)))
 		{
-			fprintf(stderr, "ModuleList::%s: attempting to load module %s from '%s'\n", __FUNCTION__, key, s);
+			::debugf("ModuleList::%s: attempting to load module %s from '%s'\n", __FUNCTION__, key, s);
 			if(!enable(s))
 			{
-				fprintf(stderr, "ModuleList::%s: failed to activate module %s\n", __FUNCTION__, key);
+				::debugf("ModuleList::%s: failed to activate module %s\n", __FUNCTION__, key);
 				failed = true;
 			}
 		}
 		else
 		{
-			fprintf(stderr, "ModuleList::%s: entry '%s' is not a string value\n", __FUNCTION__, key);
+			::debugf("ModuleList::%s: entry '%s' is not a string value\n", __FUNCTION__, key);
 		}
 	}
 	_activating = false;
@@ -110,22 +113,22 @@ Universe::ModuleList::enable(const char *name)
 
 	if(!Module::nameIsValid(name))
 	{
-		fprintf(stderr, "ModuleList::%s: '%s' is not a valid module name\n", __FUNCTION__, name);
+		::debugf("ModuleList::%s: '%s' is not a valid module name\n", __FUNCTION__, name);
 		return false;
 	}
 	Module::canonicalise(cname, sizeof(cname), name);
 	if((mod = locateActiveModule(name)))
 	{
-		fprintf(stderr, "ModuleList::%s: '%s' matches an active module\n", __FUNCTION__, name);
+		::debugf("ModuleList::%s: '%s' matches an active module\n", __FUNCTION__, name);
 		mod->release();
 		return true;
 	}
 	if(!(mod = Module::load(_universe, name)))
 	{
-		fprintf(stderr, "ModuleList::%s: failed to load module %s\n", __FUNCTION__, name);
+		::debugf("ModuleList::%s: failed to load module %s\n", __FUNCTION__, name);
 		return false;
 	}
-	fprintf(stderr, "ModuleList::%s: module %s [%s] has been loaded\n", __FUNCTION__, mod->name(), mod->canonicalName());
+	::debugf("ModuleList::%s: module %s [%s] has been loaded\n", __FUNCTION__, mod->name(), mod->canonicalName());
 	/* the array will retain the module... */
 	add(mod);
 	/* ... so we release */
@@ -145,10 +148,10 @@ Universe::ModuleList::disable(const char *name)
 		 */
 		if(!Module::nameIsValid(name))
 		{
-			fprintf(stderr, "ModuleList::%s: '%s' is not a valid module name\n", __FUNCTION__, name);
+			::debugf("ModuleList::%s: '%s' is not a valid module name\n", __FUNCTION__, name);
 			return false;
 		}
-		fprintf(stderr, "ModuleList::%s: '%s' does not match an active module\n", __FUNCTION__, name);
+		::debugf("ModuleList::%s: '%s' does not match an active module\n", __FUNCTION__, name);
 		return false;
 	}
 	/* we retain the module via locateActiveModule(), the module list
@@ -156,7 +159,7 @@ Universe::ModuleList::disable(const char *name)
 	 */
 	remove(mod);
 	/* now release the module, allowing it to be unloaded */
-	fprintf(stderr, "ModuleList::%s: releasing module '%s'\n", __FUNCTION__, mod->canonicalName());
+	::debugf("ModuleList::%s: releasing module '%s'\n", __FUNCTION__, mod->canonicalName());
 	mod->release();
 	return true;
 }
@@ -179,7 +182,7 @@ Universe::ModuleList::locateActiveModule(const char *name)
 		{
 			if(!strcmp(cname, mod->canonicalName()))
 			{
-				fprintf(stderr, "ModuleList::%s: matched module '%s' [%s] with '%s' [%s]\n", __FUNCTION__, name, cname, mod->name(), mod->canonicalName());
+				::debugf("ModuleList::%s: matched module '%s' [%s] with '%s' [%s]\n", __FUNCTION__, name, cname, mod->name(), mod->canonicalName());
 				/* still retained */
 				return mod;
 			}
@@ -197,10 +200,10 @@ Universe::ModuleList::add(Module *mod)
 
 	if((index = TArray<Module>::add(mod)) == NOTFOUND)
 	{
-		fprintf(stderr, "ModuleList::%s: module %s could not be added to array\n", __FUNCTION__, mod->canonicalName());
+		::debugf("ModuleList::%s: module %s could not be added to array\n", __FUNCTION__, mod->canonicalName());
 		return NOTFOUND;
 	}
-	fprintf(stderr, "ModuleList::%s: added %s at index %lu\n", __FUNCTION__, mod->canonicalName(), index);
+	::debugf("ModuleList::%s: added %s at index %lu\n", __FUNCTION__, mod->canonicalName(), index);
 	if(!_activating)
 	{
 		json_object_set_new(_modlist, mod->canonicalName(), json_string(mod->name()));
@@ -218,7 +221,7 @@ Universe::ModuleList::remove(Module *mod)
 		mod->release();
 		return false;
 	}
-	fprintf(stderr, "ModuleList::%s: removed %s\n", __FUNCTION__, mod->canonicalName());
+	::debugf("ModuleList::%s: removed %s\n", __FUNCTION__, mod->canonicalName());
 	if(!_activating)
 	{
 		json_object_del(_modlist, mod->canonicalName());

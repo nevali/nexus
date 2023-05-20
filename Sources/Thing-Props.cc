@@ -5,12 +5,15 @@
 
 #include <jansson.h>
 
+#include "WARP/Flux/Diagnostics.hh"
+
 #include "Nexus/Thing.hh"
 #include "Nexus/Database.hh"
 #include "Nexus/Universe.hh"
 #include "Nexus/Container.hh"
 
 using namespace Nexus;
+using namespace WARP::Flux::Diagnostics;
 
 Thing::ID
 Thing::id(void) const
@@ -31,7 +34,7 @@ Thing::setId(Thing::ID id)
 	}
 	if(_id != ID_INVALID)
 	{
-		fprintf(stderr, "Thing<%p>::%s: refusing to change ID of %s to #%ld\n", this, __FUNCTION__, ident(), id);
+		::debugf("Thing<%p>::%s: refusing to change ID of %s to #%ld\n", this, __FUNCTION__, ident(), id);
 		return false;
 	}
 	if(_universe)
@@ -39,7 +42,7 @@ Thing::setId(Thing::ID id)
 		Thing *thing = _universe->thingFromId(id);
 		if(thing)
 		{
-			fprintf(stderr, "Thing<%p>::%s: attempt to change ID to #%ld which already exists as %s\n", this, __FUNCTION__, id, thing->ident());
+			::debugf("Thing<%p>::%s: attempt to change ID to #%ld which already exists as %s\n", this, __FUNCTION__, id, thing->ident());
 			thing->release();
 			return false;
 		}
@@ -48,10 +51,10 @@ Thing::setId(Thing::ID id)
 	json_object_set_new(_obj, "id", json_integer(_id));
 	_status |= DIRTY;
 	updateIdent();
-//	fprintf(stderr, "Thing<%p>::%s: updated ID to %s\n", this, __FUNCTION__, ident());
+//	::debugf("Thing<%p>::%s: updated ID to %s\n", this, __FUNCTION__, ident());
 	if(_universe)
 	{
-//		fprintf(stderr, "Thing<%p>::%s: will now inform the universe of our new identity\n", this, __FUNCTION__);
+//		::debugf("Thing<%p>::%s: will now inform the universe of our new identity\n", this, __FUNCTION__);
 		_universe->acquire(this);
 	}
 	return true;
@@ -94,20 +97,27 @@ Thing::displayName(void) const
 bool
 Thing::setName(const char *str)
 {
-	if(str && !validName(str))
+	const char *namecheck;
+
+	namecheck = str;
+	if((_flags & SYSTEM) && str && str[0] == '*')
 	{
-		fprintf(stderr, "Thing<%p>::%s: new name '%s' is not valid for object %s\n", this, __FUNCTION__, str, ident());
+		namecheck++;
+	}
+	if(str && !validName(namecheck))
+	{
+		::debugf("Thing<%p>::%s: new name '%s' is not valid for object %s\n", this, __FUNCTION__, str, ident());
 		return false;
 	}
 	if(!nameIsSuitable(str))
 	{
 		if(str)
 		{
-			fprintf(stderr, "Thing<%p>::%s: new name '%s' is not valid for object %s\n", this, __FUNCTION__, str, ident());
+			::debugf("Thing<%p>::%s: new name '%s' is not valid for object %s\n", this, __FUNCTION__, str, ident());
 		}
 		else
 		{
-			fprintf(stderr, "Thing<%p>::%s: object %s must have a name\n", this, __FUNCTION__, ident());
+			::debugf("Thing<%p>::%s: object %s must have a name\n", this, __FUNCTION__, ident());
 		}
 		return false;		
 	}
@@ -269,7 +279,7 @@ Thing::location(void) const
 	{
 		id = ID_LIMBO;
 	}
-//	fprintf(stderr, "Thing<%p>::%s: location is #%ld\n", this, __FUNCTION__, id);
+//	::debugf("Thing<%p>::%s: location is #%ld\n", this, __FUNCTION__, id);
 	return _universe->containerFromId(id);
 }
 
@@ -288,7 +298,7 @@ Thing::setLocation(ID newId)
 
 	if(id() == ID_INVALID)
 	{
-		fprintf(stderr, "Thing<%p>::%s: not setting location on object with no ID\n", this, __FUNCTION__);
+		::debugf("Thing<%p>::%s: not setting location on object with no ID\n", this, __FUNCTION__);
 		return false;
 	}
 	if(_universe)
@@ -303,7 +313,7 @@ Thing::setLocation(ID newId)
 		}
 		if(newId != locId)
 		{
-//			fprintf(stderr, "Thing<%p>::%s: old location is #%ld, new location is #%ld\n", this, __FUNCTION__, locId, newId);
+//			::debugf("Thing<%p>::%s: old location is #%ld, new location is #%ld\n", this, __FUNCTION__, locId, newId);
 			oldloc = location();
 			if(oldloc)
 			{

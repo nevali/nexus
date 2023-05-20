@@ -12,8 +12,8 @@ using namespace Nexus::Modules::Guide;
 PROVIDE_MODULE(Guide);
 
 CommandEntry Guide::_commands[] = {
-	{ "HELP", CommandEntry::NONE, HELP::construct, "Display the Operator's Guide" },
-	{ NULL, CommandEntry::NONE, NULL, NULL }
+	{ "HELP", CommandEntry::NONE, 0, HELP::construct, "Display the Operator's Guide" },
+	{ NULL, CommandEntry::NONE, 0, NULL, NULL }
 };
 
 Guide::Guide(Universe *universe, Module *module):

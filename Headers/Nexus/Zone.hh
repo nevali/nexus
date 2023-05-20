@@ -28,6 +28,8 @@ namespace Nexus
 			 */
 			virtual Zone *zone(void) __attribute__ (( warn_unused_result )) { retain(); return this; }
 			virtual bool nameIsSuitable(const char *newName) const;
+			/* locate the channel named 'name' in this zone */
+			virtual Channel *channelWithName(const char *name) __attribute__ (( warn_unused_result ));
 	};
 }
 

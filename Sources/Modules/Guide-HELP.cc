@@ -1,11 +1,14 @@
 #include <cstring>
 
+#include "WARP/Flux/Diagnostics.hh"
+
 #include "Guide.hh"
 
 #include "Nexus/Actor.hh"
 
 using namespace Nexus;
 using namespace Nexus::Modules::Guide;
+using namespace WARP::Flux::Diagnostics;
 
 typedef struct
 {

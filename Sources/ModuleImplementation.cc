@@ -1,21 +1,24 @@
 #include <cstdio>
 
+#include "WARP/Flux/Diagnostics.hh"
+
 #include "Nexus/Universe.hh"
 #include "Nexus/Module.hh"
 #include "Nexus/Commands.hh"
 
 using namespace Nexus;
+using namespace WARP::Flux::Diagnostics;
 
 ModuleImplementation::ModuleImplementation(Universe *universe, Module *module):
 	_universe(universe),
 	_module(module)
 {
-	fprintf(stderr, "ModuleImplementation::%s: initialising module '%s' [%s] from %s\n", __FUNCTION__, name(), canonicalName(), path());
+	debugf("ModuleImplementation::%s: initialising module '%s' [%s] from %s\n", __FUNCTION__, name(), canonicalName(), path());
 }
 
 ModuleImplementation::~ModuleImplementation()
 {
-	fprintf(stderr, "ModuleImplementation::%s: de-initialising %s\n", __FUNCTION__, canonicalName());
+	debugf("ModuleImplementation::%s: de-initialising %s\n", __FUNCTION__, canonicalName());
 }
 
 /* this should not be overidden */

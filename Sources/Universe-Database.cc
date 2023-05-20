@@ -1,9 +1,12 @@
 #include <cstring>
 
+#include "WARP/Flux/Diagnostics.hh"
+
 #include "Nexus/Universe.hh"
 #include "Nexus/Database.hh"
 
 using namespace Nexus;
+using namespace WARP::Flux::Diagnostics;
 
 unsigned
 Universe::version(void) const
@@ -28,17 +31,17 @@ Universe::migrate(void)
 	{
 		if(!migrateTo(currentVersion + 1))
 		{
-			fprintf(stderr, "Universe::%s: migration to version %u failed\n", __FUNCTION__, currentVersion + 1);
+			::diagf(DIAG_CRITICAL, "Universe::%s: migration to version %u failed\n", __FUNCTION__, currentVersion + 1);
 			return false;
 		}
 		if(version() <= currentVersion)
 		{
-			fprintf(stderr, "Universe::%s: post-migration version is %u (expected at least %u)\n", __FUNCTION__, version(), currentVersion + 1);
+			::diagf(DIAG_CRITICAL, "Universe::%s: post-migration version is %u (expected at least %u)\n", __FUNCTION__, version(), currentVersion + 1);
 			return false;
 		}
 		sync();
 	}
-	fprintf(stderr, "Universe::%s: universe is up to date with version %u\n", __FUNCTION__, version());
+	::diagf(DIAG_NOTICE, "Universe::%s: universe is up to date with version %u\n", __FUNCTION__, version());
 	return true;
 }
 
@@ -70,7 +73,7 @@ Universe::sync(void)
 void
 Universe::syncObjects(void)
 {
-//	fprintf(stderr, "Universe::%s: synchronising changes\n", __FUNCTION__);
+//	::debugf("Universe::%s: synchronising changes\n", __FUNCTION__);
 	for(size_t n = 0; n < _objectsSize; n++)
 	{
 		if(_objects[n])
@@ -102,7 +105,7 @@ Universe::thingFromId(Thing::ID id)
 		/* this approach won't work well with sparsely-numbered objects */
 		if(_objects[id])
 		{
-//			fprintf(stderr, "Universe::%s: returning cached Thing<%p> #%ld%c\n", __FUNCTION__, _objects[id], id, _objects[id]->typeChar());
+//			::debugf("Universe::%s: returning cached Thing<%p> #%ld%c\n", __FUNCTION__, _objects[id], id, _objects[id]->typeChar());
 			_objects[id]->retain();
 			return _objects[id];
 		}
@@ -153,7 +156,7 @@ Universe::acquire(Thing *thing)
 
 	if(newSize > _objectsSize)
 	{
-//		fprintf(stderr, "Universe::%s: resizing object cache from %lu to %lu\n", __FUNCTION__, _objectsSize, newSize);
+//		::debugf("Universe::%s: resizing object cache from %lu to %lu\n", __FUNCTION__, _objectsSize, newSize);
 		p = (Thing **) realloc(_objects, newSize * sizeof(Thing *));
 		if(!p)
 		{
@@ -166,14 +169,14 @@ Universe::acquire(Thing *thing)
 	}
 	if(_objects[id])
 	{
-		fprintf(stderr, "Universe::%s: WARNING: discarding old object #%lu (Thing<%p>) in favour of Thing<%p> %s\n",
+		::debugf("Universe::%s: WARNING: discarding old object #%lu (Thing<%p>) in favour of Thing<%p> %s\n",
 			__FUNCTION__, id, _objects[id], thing, thing->ident());
 	}
 	/* this is a weak reference -- see Universe::discard() which is invoked by
 	 * Thing::~Thing()
 	 */
 	_objects[id] = thing;
-//	fprintf(stderr, "Universe::%s: acquired Thing<%p> %s\n", __FUNCTION__, thing, thing->ident());
+//	::debugf("Universe::%s: acquired Thing<%p> %s\n", __FUNCTION__, thing, thing->ident());
 	thing->setUniverse(this);
 }
 
@@ -186,7 +189,7 @@ Universe::discard(Thing *thing)
 	{
 		if(_objects[id])
 		{
-//			fprintf(stderr, "Universe::%s: discarding object %s\n", __FUNCTION__, thing->ident());
+//			::debugf("Universe::%s: discarding object %s\n", __FUNCTION__, thing->ident());
 			_objects[id] = NULL;
 		}
 	}

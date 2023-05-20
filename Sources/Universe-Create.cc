@@ -4,6 +4,8 @@
 
 #include <jansson.h>
 
+#include "WARP/Flux/Diagnostics.hh"
+
 #include "Nexus/Database.hh"
 #include "Nexus/Thing.hh"
 #include "Nexus/Container.hh"
@@ -11,6 +13,7 @@
 #include "Nexus/Player.hh"
 
 using namespace Nexus;
+using namespace WARP::Flux::Diagnostics;
 
 /* Methods for the creation of new objects in the Universe */
 
@@ -22,7 +25,7 @@ Universe::createObject(json_t *object, const char *name, bool allocId, Container
 	thing = Thing::objectFromJSON(object, true);
 	if(!thing)
 	{
-		fprintf(stderr, "Universe::%s: failed to create object from JSON\n", __FUNCTION__);
+		::debugf("Universe::%s: failed to create object from JSON\n", __FUNCTION__);
 		return NULL;
 	}
 	thing->setDatabase(this->_db);
@@ -31,7 +34,7 @@ Universe::createObject(json_t *object, const char *name, bool allocId, Container
 	{
 		if(!thing->setName(name))
 		{
-			fprintf(stderr, "Universe::%s: failed to set name of new object to '%s'\n", __FUNCTION__, name);
+			::debugf("Universe::%s: failed to set name of new object to '%s'\n", __FUNCTION__, name);
 			thing->release();
 			return NULL;
 		}
@@ -41,7 +44,7 @@ Universe::createObject(json_t *object, const char *name, bool allocId, Container
 		Thing::ID id;
 
 		id = _db->nextId();
-//		fprintf(stderr, "Universe::%s: Database-provided next ID is #%ld, local maximum is #%ld\n", __FUNCTION__, id, _maxId);
+//		::debugf("Universe::%s: Database-provided next ID is #%ld, local maximum is #%ld\n", __FUNCTION__, id, _maxId);
 		if(id <= _maxId)
 		{
 			/* make sure multiple yet-to-be-synced objects don't end up with clashing IDs */
@@ -50,7 +53,7 @@ Universe::createObject(json_t *object, const char *name, bool allocId, Container
 		}
 		if(!thing->setId(id))
 		{
-			fprintf(stderr, "Universe::%s: cannot assign ID to newly-created object\n", __FUNCTION__);
+			::debugf("Universe::%s: cannot assign ID to newly-created object\n", __FUNCTION__);
 			thing->release();
 			return NULL;
 		}
@@ -59,7 +62,7 @@ Universe::createObject(json_t *object, const char *name, bool allocId, Container
 	{
 		if(!thing->setLocation(location))
 		{
-			fprintf(stderr, "Universe::%s: cannot set location on newly-created object\n",  __FUNCTION__);
+			::debugf("Universe::%s: cannot set location on newly-created object\n",  __FUNCTION__);
 			thing->release();
 			return NULL;
 		}
@@ -135,12 +138,6 @@ Universe::robotTemplate(void)
 }
 
 json_t *
-Universe::hologramTemplate(void)
-{
-	return objectTemplate("hologram");
-}
-
-json_t *
 Universe::executableTemplate(void)
 {
 	return objectTemplate("executable");
@@ -150,6 +147,12 @@ json_t *
 Universe::variableTemplate(void)
 {
 	return objectTemplate("variable");
+}
+
+json_t *
+Universe::channelTemplate(void)
+{
+	return objectTemplate("channel");
 }
 
 
@@ -165,12 +168,12 @@ Universe::newPlayer(const char *name, bool allocId, Container *location)
 		p = playerFromName(name);
 		if(p)
 		{
-			fprintf(stderr, "Universe::%s: a Player named '%s' already exists\n", __FUNCTION__, p->displayName());
+			::debugf("Universe::%s: a Player named '%s' already exists\n", __FUNCTION__, p->displayName());
 			p->release();
 			return NULL;
 		}
 	}
-//	fprintf(stderr, "Universe::%s: creating new Player '%s'\n", __FUNCTION__, name);
+//	::debugf("Universe::%s: creating new Player '%s'\n", __FUNCTION__, name);
 	if(!(obj = playerTemplate()))
 	{
 		return NULL;
@@ -190,7 +193,7 @@ Universe::newContainer(const char *name, bool allocId, Container *location)
 	json_t *obj;
 	Thing *thing;
 
-//	fprintf(stderr, "Universe::%s: creating new Container '%s'\n", __FUNCTION__, name);
+//	::debugf("Universe::%s: creating new Container '%s'\n", __FUNCTION__, name);
 	if(!(obj = containerTemplate()))
 	{
 		return NULL;
@@ -215,12 +218,12 @@ Universe::newZone(const char *name, bool allocId, Container *location)
 		thing = zoneFromName(name);
 		if(thing)
 		{
-			fprintf(stderr, "Universe::%s: a Zone named '%s' already exists\n", __FUNCTION__, thing->displayName());
+			::debugf("Universe::%s: a Zone named '%s' already exists\n", __FUNCTION__, thing->displayName());
 			thing->release();
 			return NULL;
 		}
 	}
-//	fprintf(stderr, "Universe::%s: creating new Zone '%s'\n", __FUNCTION__, name);
+//	::debugf("Universe::%s: creating new Zone '%s'\n", __FUNCTION__, name);
 	if(!(obj = zoneTemplate()))
 	{
 		return NULL;
@@ -241,7 +244,7 @@ Universe::newRoom(const char *name, bool allocId, Container *location)
 	json_t *obj;
 	Thing *thing;
 
-//	fprintf(stderr, "Universe::%s: creating new Room '%s'\n", __FUNCTION__, name);
+//	::debugf("Universe::%s: creating new Room '%s'\n", __FUNCTION__, name);
 	if(!(obj = roomTemplate()))
 	{
 		return NULL;
@@ -262,7 +265,7 @@ Universe::newThing(const char *name, bool allocId, Container *location)
 	json_t *obj;
 	Thing *thing;
 
-//	fprintf(stderr, "Universe::%s: creating new Thing '%s'\n", __FUNCTION__, name);
+//	::debugf("Universe::%s: creating new Thing '%s'\n", __FUNCTION__, name);
 	if(!(obj = thingTemplate()))
 	{
 		return NULL;
@@ -282,7 +285,7 @@ Universe::newVariable(const char *name, bool allocId, Container *location)
 	json_t *obj;
 	Thing *thing;
 
-//	fprintf(stderr, "Universe::%s: creating new Variable '%s'\n", __FUNCTION__, name);
+//	::debugf("Universe::%s: creating new Variable '%s'\n", __FUNCTION__, name);
 	if(!(obj = variableTemplate()))
 	{
 		return NULL;
@@ -302,7 +305,7 @@ Universe::newPortal(const char *name, bool allocId, Container *location)
 	json_t *obj;
 	Thing *thing;
 
-//	fprintf(stderr, "Universe::%s: creating new Portal '%s'\n", __FUNCTION__, name);
+//	::debugf("Universe::%s: creating new Portal '%s'\n", __FUNCTION__, name);
 	if(!(obj = portalTemplate()))
 	{
 		return NULL;
@@ -314,4 +317,24 @@ Universe::newPortal(const char *name, bool allocId, Container *location)
 		return NULL;
 	}
 	return thing->asPortal();
+}
+
+Channel *
+Universe::newChannel(const char *name, bool allocId, Container *location)
+{
+	json_t *obj;
+	Thing *thing;
+
+//	::debugf("Universe::%s: creating new Channel '%s'\n", __FUNCTION__, name);
+	if(!(obj = channelTemplate()))
+	{
+		return NULL;
+	}
+	thing = createObject(obj, name, allocId, location);
+	json_decref(obj);
+	if(!thing)
+	{
+		return NULL;
+	}
+	return thing->asChannel();
 }

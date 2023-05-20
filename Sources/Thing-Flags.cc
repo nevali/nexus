@@ -3,11 +3,14 @@
 
 #include <jansson.h>
 
+#include "WARP/Flux/Diagnostics.hh"
+
 #include "Nexus/Thing.hh"
 #include "Nexus/Database.hh"
 #include "Nexus/Universe.hh"
 
 using namespace Nexus;
+using namespace WARP::Flux::Diagnostics;
 
 unsigned
 Thing::flags(void) const
@@ -30,7 +33,7 @@ Thing::updateFlags(void)
 
 	if(!(flags = json_object_get(_obj, "flags")) || !json_is_object(flags))
 	{
-		fprintf(stderr, "Thing<%p>::%s: creating new flags object\n", this, __FUNCTION__);
+		::debugf("Thing<%p>::%s: creating new flags object\n", this, __FUNCTION__);
 		flags = json_object();
 		json_object_set_new(_obj, "flags", flags);
 	}
@@ -78,13 +81,19 @@ Thing::updateFlags(void)
 bool
 Thing::setFlag(const char *flag, bool set)
 {
-	if(!strcmp(flag, "system") || !strcmp(flag, "hidden") || !strcmp(flag, "fixed") || !strcmp(flag, "immortal") || !strcmp(flag, "deleted"))
+	const char *flags[] = { "system", "hidden", "fixed", "deleted", NULL };
+	size_t c;
+
+	for(c = 0; flags[c]; c++)
 	{
-		json_object_set_new(json_object_get(_obj, "flags"), flag, json_boolean(set));
-		updateFlags();
-		return true;
+		if(!strcasecmp(flags[c], flag))
+		{
+			json_object_set_new(json_object_get(_obj, "flags"), flags[c], json_boolean(set));
+			updateFlags();
+			return true;
+		}
 	}
-	fprintf(stderr, "Thing<%p>::%s: unknown flag: '%s'\n", this, __FUNCTION__, flag);
+	::debugf("Thing<%p>::%s: unknown flag: '%s'\n", this, __FUNCTION__, flag);
 	return false;
 }
 
@@ -127,18 +136,6 @@ Thing::applyFlag(const char *flag, bool set)
 		}
 		return;
 	}
-	if(!strcmp(flag, "immortal"))
-	{
-		if(set)
-		{
-			_flags = _flags | IMMORTAL;
-		}
-		else
-		{
-			_flags = _flags & (~IMMORTAL);
-		}
-		return;
-	}
 	if(!strcmp(flag, "deleted"))
 	{
 		if(set)
@@ -151,5 +148,5 @@ Thing::applyFlag(const char *flag, bool set)
 		}
 		return;
 	}
-	fprintf(stderr, "Thing<%p>::%s: unknown flag: '%s'\n", this, __FUNCTION__, flag);
+	::debugf("Thing<%p>::%s: unknown flag: '%s'\n", this, __FUNCTION__, flag);
 }

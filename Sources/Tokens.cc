@@ -4,9 +4,12 @@
 #include <cctype>
 #include <cstdlib>
 
+#include "WARP/Flux/Diagnostics.hh"
+
 #include "Nexus/Tokens.hh"
 
 using namespace Nexus;
+using namespace WARP::Flux::Diagnostics;
 
 static inline bool
 iswhitespace(int ch)
@@ -98,7 +101,7 @@ Tokens::dump(void)
 
 	for(n = 0; n < count(); n++)
 	{
-		fprintf(stderr, "Token %lu = '%s'\n", n, tokenAtIndex(n)->_raw);
+		::debugf("Token %lu = '%s'\n", n, tokenAtIndex(n)->_raw);
 	}
 }
 
@@ -111,7 +114,7 @@ Token::Token(const char *source, size_t start, size_t end):
 	_raw = (char *) calloc(1, _length + 1);
 	memcpy(_raw, &(source[start]), _length);
 	process();
-//	fprintf(stderr, "Token::%s: start=%lu, end=%lu, length=%lu, raw='%s', processed='%s'\n", __FUNCTION__, start, end, _length, _raw, _processed);
+//	::debugf("Token::%s: start=%lu, end=%lu, length=%lu, raw='%s', processed='%s'\n", __FUNCTION__, start, end, _length, _raw, _processed);
 }
 
 Token::~Token()

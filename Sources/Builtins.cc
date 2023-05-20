@@ -3,6 +3,8 @@
 #include <cstring>
 #include <cctype>
 
+#include "WARP/Flux/Diagnostics.hh"
+
 #include "Nexus/Universe.hh"
 #include "Nexus/Commands.hh"
 #include "Nexus/Actor.hh"
@@ -14,28 +16,29 @@
 #include "Nexus/Tokens.hh"
 
 using namespace Nexus;
+using namespace WARP::Flux::Diagnostics;
 
 BuiltinsParser::BuiltinsParser(Universe *universe):
 	Parser(universe)
 {
 	CommandEntry c[] = {
-		{ "BYE", CommandEntry::UNAMBIGUOUS|CommandEntry::HIDDEN, Builtins::QUIT::construct, NULL },
+		{ "BYE", CommandEntry::UNAMBIGUOUS|CommandEntry::HIDDEN, 0, Builtins::QUIT::construct, NULL },
 
-		{ "COMMANDS", CommandEntry::NONE, Builtins::COMMANDS::construct, "List available commands" },
+		{ "COMMANDS", CommandEntry::NONE, 0, Builtins::COMMANDS::construct, "List available commands" },
 		
-		{ "DISABLE", CommandEntry::NONE, Builtins::DISABLE::construct, "Disable a module" },
+		{ "DISABLE", CommandEntry::NONE, Thing::ENGINEER, Builtins::DISABLE::construct,"Disable a module" },
 		
-		{ "ENABLE", CommandEntry::NONE, Builtins::ENABLE::construct, "Enable a module" },
+		{ "ENABLE", CommandEntry::NONE, Thing::ENGINEER, Builtins::ENABLE::construct, "Enable a module" },
 		
-		{ "EXIT", CommandEntry::UNAMBIGUOUS|CommandEntry::HIDDEN, Builtins::QUIT::construct, NULL },
+		{ "EXIT", CommandEntry::UNAMBIGUOUS|CommandEntry::HIDDEN, 0, Builtins::QUIT::construct, NULL },
 
-		{ "LOGOUT", CommandEntry::UNAMBIGUOUS|CommandEntry::HIDDEN, Builtins::QUIT::construct, NULL },
-		{ "LSMOD", CommandEntry::UNAMBIGUOUS|CommandEntry::HIDDEN, Builtins::MODULES::construct, NULL },
+		{ "LOGOUT", CommandEntry::UNAMBIGUOUS|CommandEntry::HIDDEN, 0, Builtins::QUIT::construct, NULL },
+		{ "LSMOD", CommandEntry::UNAMBIGUOUS|CommandEntry::HIDDEN, Thing::ENGINEER, Builtins::MODULES::construct, NULL },
 
-		{ "MODULES", CommandEntry::NONE, Builtins::MODULES::construct, "List active modules" },
+		{ "MODULES", CommandEntry::NONE, Thing::ENGINEER, Builtins::MODULES::construct, "List active modules" },
 		
-		{ "QUIT", CommandEntry::UNAMBIGUOUS, Builtins::QUIT::construct, "End your session" },
-		{ NULL, CommandEntry::NONE, NULL, NULL }
+		{ "QUIT", CommandEntry::UNAMBIGUOUS, 0, Builtins::QUIT::construct, "End your session" },
+		{ NULL, CommandEntry::NONE, 0, NULL, NULL }
 	};
 	add(c);
 }
@@ -144,7 +147,7 @@ BuiltinsParser::parse(Actor *who, const char *commandLine)
 	tokens->release();
 	if(!command)
 	{
-		fprintf(stderr, "BuiltinsParser::%s: constructor for command '%s' failed\n", __FUNCTION__, exact->name);
+		::debugf("BuiltinsParser::%s: constructor for command '%s' failed\n", __FUNCTION__, exact->name);
 		return NULL;
 	}
 	/* parsing succeeded, return the Command so that it can be executed */

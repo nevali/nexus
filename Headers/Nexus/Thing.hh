@@ -21,7 +21,8 @@ namespace Nexus
 	class Robot;
 	class Executable;
 	class Variable;
-	
+	class Channel;
+
 	class Thing: public WARP::Flux::Object
 	{
 		public:
@@ -41,19 +42,28 @@ namespace Nexus
 				EXECUTABLE = 'X',
 				VARIABLE =   'V',
 				SWITCH =     'S',
-				TIMER =      'F'
+				TIMER =      'F', /* for 'fuse' */
+				CHANNEL =    'M'  /* for... 'messages'... */
 			} TypeID;
 
 			typedef enum
 			{
 				NONE = 0,
-				SYSTEM = (1<<1),
-				HIDDEN = (1<<2),
-				FIXED = (1<<3),
-				IMMORTAL = (1<<4), /* Actors */
-				LOCKED = (1<<5),  /* Containers */
-				DELETED = (1<<6),
-				HOLOGRAM = (1<<7)
+				SYSTEM = (1<<1),       /* all: cannot be modified by user commands */
+				HIDDEN = (1<<2),       /* all: invisible */
+				FIXED = (1<<3),        /* all: cannot be moved*/
+				IMMORTAL = (1<<4),     /* Actors: dying doesn't lose a life */
+				LOCKED = (1<<5),       /* Containers: nothing can be added or removed */
+				DELETED = (1<<6),      /* all: object has been @DESTROYed */
+				HOLOGRAM = (1<<7),     /* all: object is a hologram of another object */
+				INVULNERABLE = (1<<8), /* Actors: takes no damage */
+				BUILDER = (1<<9),      /* Actors: able to use building commands */
+				OMNIPOTENT = (1<<10),  /* Actors: can go anywhere */
+				XRAY = (1<<11),        /* Actors: can see everything */
+				DEBUGGER = (1<<12),    /* Actors: can see the *DEBUG system channel, access debugging commands */
+				AUDITOR = (1<<13),     /* Actors: can see the *AUDIT system channel, access auditing commands */
+				DBA = (1<<14),         /* Actors: can access database commands */
+				ENGINEER = (1<<15)     /* Actors: can manage modules, shut down services, etc. */
 			} Flags;
 
 			typedef enum
@@ -74,6 +84,7 @@ namespace Nexus
 			static Thing *objectFromJSON(json_t *source, bool isNew = false);
 			static bool validName(const char *name);
 			static const char *typeName(TypeID typeId);
+			static TypeID typeId(const char *name);
 		protected:
 			Thing(json_t *source = NULL);
 			virtual ~Thing();
@@ -107,6 +118,8 @@ namespace Nexus
 			virtual bool isRobot(void) const { return false; };
 			virtual bool isExecutable(void) const { return false; };
 			virtual bool isVariable(void) const { return false; };
+			virtual bool isChannel(void) const { return false; };
+
 			virtual Container *asContainer(void) const;
 			virtual Zone *asZone(void) const;
 			virtual Room *asRoom(void) const;
@@ -116,6 +129,7 @@ namespace Nexus
 			virtual Robot *asRobot(void) const;
 			virtual Executable *asExecutable(void) const;
 			virtual Variable *asVariable(void) const;
+			virtual Channel *asChannel(void) const;
 		public:
 			/* object properties */
 			virtual Universe *universe(void) const;

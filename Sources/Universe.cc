@@ -4,6 +4,8 @@
 
 #include <jansson.h>
 
+#include "WARP/Flux/Diagnostics.hh"
+
 #include "Nexus/Database.hh"
 #include "Nexus/Thing.hh"
 #include "Nexus/Player.hh"
@@ -12,8 +14,10 @@
 #include "Nexus/Variable.hh"
 #include "Nexus/Room.hh"
 #include "Nexus/Module.hh"
+#include "Nexus/Channel.hh"
 
 using namespace Nexus;
+using namespace WARP::Flux::Diagnostics;
 
 Universe::Universe(Database *db):
 	Object(),
@@ -32,42 +36,60 @@ Universe::Universe(Database *db):
 	_launchTime(0),
 	_ageAtLaunch(0),
 	_age(0),
-	_running(true)
+	_running(true),
+	_globalChannel(NULL),
+	_debugChannel(NULL),
+	_auditChannel(NULL)
 {
 	gettimeofday(&_wallClock, NULL);
-	fprintf(stderr, "Universe::%s: universe is starting up\n", __FUNCTION__);
+	::debugf("Universe::%s: universe is starting up\n", __FUNCTION__);
 	db->retain();
 	_meta = db->universe();
 	json_incref(_meta);
-	fprintf(stderr, "Universe::%s: universe version %u (current is %u)\n", __FUNCTION__, version(), UVERSION);
+	::debugf("Universe::%s: universe version %u (current is %u)\n", __FUNCTION__, version(), UVERSION);
 	_ageAtLaunch = _age = json_integer_value(json_object_get(_meta, "age"));
 	updateClocks();
 	_launchTime = _now;
-	fprintf(stderr, "Universe::%s: creating Limbo\n", __FUNCTION__);
+	::debugf("Universe::%s: creating Limbo\n", __FUNCTION__);
 	_limbo = new Limbo();
 	_limbo->setUniverse(this);
-	fprintf(stderr, "Universe::%s: pre-loading Operator\n", __FUNCTION__);
+	::debugf("Universe::%s: pre-loading Operator\n", __FUNCTION__);
 	_actors = new WARP::Flux::TArray<Actor>();
 	_operator = playerFromName("operator");
 	if(!_operator)
 	{
-		fprintf(stderr, "Universe::%s: failed to get Player 'operator'\n", __FUNCTION__);
+		::debugf("Universe::%s: failed to get Player 'operator'\n", __FUNCTION__);
 	}
 
-	fprintf(stderr, "Universe::%s: pre-loading system Zones\n", __FUNCTION__);
+	::debugf("Universe::%s: pre-loading system Zones\n", __FUNCTION__);
 	_root = zoneFromName("root");
 	if(!_root)
 	{
-		fprintf(stderr, "Universe::%s: failed to get Zone 'root'\n", __FUNCTION__);
+		::debugf("Universe::%s: failed to get Zone 'root'\n", __FUNCTION__);
 	}
 	_system = zoneFromName("system");
 	if(!_system)
 	{
-		fprintf(stderr, "Universe::%s: failed to get Zone 'system'\n", __FUNCTION__);
+		::debugf("Universe::%s: failed to get Zone 'system'\n", __FUNCTION__);
 	}
-	fprintf(stderr, "Universe::%s: creating parsers\n", __FUNCTION__);
+	_globalChannel = systemChannelWithName("*GLOBAL");
+	if(!_globalChannel)
+	{
+		::debugf("Universe::%s: failed to get system Channel '*GLOBAL*'\n", __FUNCTION__);
+	}
+	_debugChannel = systemChannelWithName("*DEBUG");
+	if(!_debugChannel)
+	{
+		::debugf("Universe::%s: failed to get system Channel '*DEBUG*'\n", __FUNCTION__);
+	}
+	_auditChannel = systemChannelWithName("*AUDIT");
+	if(!_auditChannel)
+	{
+		::debugf("Universe::%s: failed to get system Channel '*AUDIT*'\n", __FUNCTION__);
+	}
+	::debugf("Universe::%s: creating parsers\n", __FUNCTION__);
 	_builtinsParser = new BuiltinsParser(this);
-	fprintf(stderr, "Universe::%s: initialisation complete\n", __FUNCTION__);
+	::debugf("Universe::%s: initialisation complete\n", __FUNCTION__);
 	_modules = new Universe::ModuleList(this);
 }
 
@@ -75,19 +97,19 @@ Universe::~Universe()
 {
 	size_t c, count;
 
-	fprintf(stderr, "Universe::%s: shutting down...\n", __FUNCTION__);
+	::debugf("Universe::%s: shutting down...\n", __FUNCTION__);
 	if(_actors)
 	{
-		fprintf(stderr, "- releasing actors\n");
+		::debugf("- releasing actors\n");
 		_actors->release();
 		_actors = NULL;
 	}
 	if(_modules)
 	{
-		fprintf(stderr, "- releasing modules\n");
+		::debugf("- releasing modules\n");
 		_modules->release();
 	}
-	fprintf(stderr, "- releasing parsers\n");
+	::debugf("- releasing parsers\n");
 	if(_builtinsParser)
 	{
 		_builtinsParser->release();
@@ -96,27 +118,42 @@ Universe::~Universe()
 	{
 		_defaultParser->release();
 	}
-	fprintf(stderr, "- syncing database\n");
+	::debugf("- syncing database\n");
 	sync();
 	json_decref(_meta);
+	if(_globalChannel)
+	{
+		_globalChannel->release();
+		_globalChannel = NULL;
+	}
+	if(_debugChannel)
+	{
+		_debugChannel->release();
+		_debugChannel = NULL;
+	}
+	if(_auditChannel)
+	{
+		_auditChannel->release();
+		_auditChannel = NULL;
+	}
 	if(_root)
 	{
-		fprintf(stderr, "- releasing root Zone\n");
+		::debugf("- releasing root Zone\n");
 		_root->release();
 	}
 	if(_system)
 	{
-		fprintf(stderr, "- releasing system Zone\n");
+		::debugf("- releasing system Zone\n");
 		_system->release();
 	}
 	if(_operator)
 	{
-		fprintf(stderr, "- releasing Operator\n");
+		::debugf("- releasing Operator\n");
 		_operator->release();
 	}
 	if(_limbo)
 	{
-		fprintf(stderr, "- releasing Limbo\n");
+		::debugf("- releasing Limbo\n");
 		_limbo->release();
 	}
 	count = 0;
@@ -128,8 +165,8 @@ Universe::~Universe()
 		}
 	}
 	free(_objects);
-	fprintf(stderr, "- %lu latent cached objects\n", count);
-	fprintf(stderr, "- releasing Database\n");
+	::debugf("- %lu latent cached objects\n", count);
+	::debugf("- releasing Database\n");
 	_db->release();
 }
 

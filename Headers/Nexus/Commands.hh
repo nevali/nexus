@@ -28,6 +28,8 @@ namespace Nexus
 		const char *name;
 		/* the command flags */
 		unsigned flags;
+		/* the flags the calling Actor must have */
+		unsigned actorFlags;
 		/* the Constructor callback */
 		Constructor constructor;
 		/* the short help text */

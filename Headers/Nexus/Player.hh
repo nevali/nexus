@@ -24,6 +24,7 @@ namespace Nexus
 			Player(json_t *source): Actor(source), _connected(false), _inputBuffer(NULL), _channel(NULL) {}
 			virtual ~Player();
 			virtual void sendPrompt(void);
+			virtual void connectChannels(void);
 		public:
 			virtual TypeID typeId(void) const { return PLAYER; }
 			virtual bool isPlayer(void) const { return true; }

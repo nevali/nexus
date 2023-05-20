@@ -5,7 +5,8 @@ lib_LTLIBRARIES = libNexus.la
 libNexus_la_SOURCES = \
 	Thing.cc Thing-Verbs.cc Thing-IO.cc Thing-Types.cc \
 	Thing-Props.cc Thing-Flags.cc Thing-Status.cc Container.cc Actor.cc \
-	Player.cc Variable.cc Zone.cc Limbo.cc Database.cc \
+	Player.cc Variable.cc Zone.cc Channel.cc Limbo.cc \
+	Database.cc \
 	Universe.cc Universe-Schema.cc Universe-Create.cc Universe-Modules.cc \
 	Universe-Time.cc Universe-SystemObjects.cc Universe-Actors.cc \
 	Universe-Database.cc \

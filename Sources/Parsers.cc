@@ -3,10 +3,13 @@
 #include <cstring>
 #include <cctype>
 
+#include "WARP/Flux/Diagnostics.hh"
+
 #include "Nexus/Universe.hh"
 #include "Nexus/Commands.hh"
 
 using namespace Nexus;
+using namespace WARP::Flux::Diagnostics;
 
 Parser::Parser(Universe *universe):
 	Object(),
@@ -50,7 +53,7 @@ Parser::remove(const CommandEntry &entry)
 		if(!strcasecmp(_commands[c].name, entry.name) &&
 			_commands[c].constructor == entry.constructor)
 		{
-//			fprintf(stderr, "Parser::%s: removing entry %lu ('%s') from commands\n", __FUNCTION__, c, entry.name);
+//			debugf("Parser::%s: removing entry %lu ('%s') from commands\n", __FUNCTION__, c, entry.name);
 			if(c + 1 < _ncommands)
 			{
 				/* move all of the following commands up a place */
@@ -63,12 +66,12 @@ Parser::remove(const CommandEntry &entry)
 			}
 			_ncommands--;
 #if 0			
-			fprintf(stderr, "----- List is now -----\n");
+			debugf("----- List is now -----\n");
 			for(size_t c = 0; c < _ncommands; c++)
 			{
-				fprintf(stderr, "  %lu => %s\n", c, _commands[c].name);
+				debugf("  %lu => %s\n", c, _commands[c].name);
 			}
-			fprintf(stderr, "----------------------\n");
+			debugf("----------------------\n");
 #endif
 			return true;
 		}
@@ -86,12 +89,12 @@ Parser::add(const CommandEntry *entry)
 	{
 		if(!add(entry[c]))
 		{
-			fprintf(stderr, "Parser::%s: failed to add command entry '%s'\n", __FUNCTION__, entry[c].name);
+			debugf("Parser::%s: failed to add command entry '%s'\n", __FUNCTION__, entry[c].name);
 			r = false;
 		}
 		else
 		{
-			fprintf(stderr, "Parser::%s: registered command '%s'\n", __FUNCTION__, entry[c].name);
+			debugf("Parser::%s: registered command '%s'\n", __FUNCTION__, entry[c].name);
 		}
 	}
 	return r;
@@ -107,12 +110,12 @@ Parser::remove(const CommandEntry *entry)
 	{
 		if(!remove(entry[c]))
 		{
-			fprintf(stderr, "Parser::%s: failed to remove command entry '%s'\n", __FUNCTION__, entry[c].name);
+			debugf("Parser::%s: failed to remove command entry '%s'\n", __FUNCTION__, entry[c].name);
 			r = false;
 		}
 		else
 		{
-			fprintf(stderr, "Parser::%s: unregistered command '%s'\n", __FUNCTION__, entry[c].name);
+			debugf("Parser::%s: unregistered command '%s'\n", __FUNCTION__, entry[c].name);
 		}
 	}
 	return r;

@@ -12,10 +12,13 @@
 
 #include <jansson.h>
 
+#include "WARP/Flux/Diagnostics.hh"
+
 #include "Nexus/Database.hh"
 #include "Nexus/Thing.hh"
 
 using namespace Nexus;
+using namespace WARP::Flux::Diagnostics;
 
 Database *
 Database::create(const char *path)
@@ -35,7 +38,7 @@ Database::open(const char *path)
 	db = new Database(path);
 	if(!db->version())
 	{
-		fprintf(stderr, "Database::%s: path '%s' is not a valid database\n", __FUNCTION__, path);
+		debugf("Database::%s: path '%s' is not a valid database\n", __FUNCTION__, path);
 		db->release();
 		errno = ENOENT;
 		return NULL;
@@ -55,7 +58,12 @@ Database::canonicalise(char *buf, size_t buflen, const char *src)
 	}
 	for(n = 0; n + 1 < buflen && src && *src; src++)
 	{
-		if(isalnum(*src))
+		if(!n && *src == '*')
+		{
+			buf[n] = *src;
+			n++;
+		}
+		else if(isalnum(*src))
 		{
 			buf[n] = tolower(*src);
 			n++;
@@ -69,22 +77,22 @@ Database::Database(const char *path):
 	Object(),
 	_dirty(true)
 {
-	fprintf(stderr, "Database::%s: starting with path '%s'\n", __FUNCTION__, path);
+	debugf("Database::%s: starting with path '%s'\n", __FUNCTION__, path);
 	_basePath = strdup(path);
 	_pathBufSize = strlen(path) + 128;
 	_pathBuf = (char *) calloc(1, _pathBufSize + 1);
 	_tmpBuf = (char *) calloc(1, _pathBufSize + 1);
 	snprintf(_pathBuf, _pathBufSize, "%s/db.json", _basePath);
-	fprintf(stderr, "Database::%s: attempting to load metadata from %s\n", __FUNCTION__, _pathBuf);
+	debugf("Database::%s: attempting to load metadata from %s\n", __FUNCTION__, _pathBuf);
 	_meta = json_load_file(_pathBuf, 0, NULL);
 	if(!_meta)
 	{
-		fprintf(stderr, "Database::%s: WARNING: no metadata available\n", __FUNCTION__);
+		debugf("Database::%s: WARNING: no metadata available\n", __FUNCTION__);
 		_meta = json_object();
 		json_object_set_new(_meta, "created", json_integer(time(NULL)));
 	}
 	snprintf(_pathBuf, _pathBufSize, "%s/players.json", _basePath);
-	fprintf(stderr, "Database::%s: attempting to load Players index from %s\n", __FUNCTION__, _pathBuf);
+	debugf("Database::%s: attempting to load Players index from %s\n", __FUNCTION__, _pathBuf);
 	_playerIndex = json_load_file(_pathBuf, 0, NULL);
 	if(!_playerIndex)
 	{
@@ -92,7 +100,7 @@ Database::Database(const char *path):
 	}
 
 	snprintf(_pathBuf, _pathBufSize, "%s/zones.json", _basePath);
-	fprintf(stderr, "Database::%s: attempting to load Zones index from %s\n", __FUNCTION__, _pathBuf);
+	debugf("Database::%s: attempting to load Zones index from %s\n", __FUNCTION__, _pathBuf);
 	_zoneIndex = json_load_file(_pathBuf, 0, NULL);
 	if(!_zoneIndex)
 	{
@@ -102,7 +110,7 @@ Database::Database(const char *path):
 
 Database::~Database()
 {
-	fprintf(stderr, "Database::%s: shutting down\n", __FUNCTION__);
+	debugf("Database::%s: shutting down\n", __FUNCTION__);
 	json_decref(_meta);
 	json_decref(_playerIndex);
 	json_decref(_zoneIndex);
@@ -175,7 +183,7 @@ Database::settings(void)
 	value = json_object_get(_meta, "settings");
 	if(!value)
 	{
-		fprintf(stderr, "Database::%s: 'settings' key is not present in metadata object\n", __FUNCTION__);
+		debugf("Database::%s: 'settings' key is not present in metadata object\n", __FUNCTION__);
 		value = json_object();
 		json_object_set_new(_meta, "settings", value);
 	}
@@ -190,7 +198,7 @@ Database::universe(void)
 	value = json_object_get(_meta, "universe");
 	if(!value)
 	{
-		fprintf(stderr, "Database::%s: 'universe' key is not present in metadata object\n", __FUNCTION__);
+		debugf("Database::%s: 'universe' key is not present in metadata object\n", __FUNCTION__);
 		value = json_object();
 		json_object_set_new(_meta, "universe", value);
 	}
@@ -205,13 +213,13 @@ Database::jsonFromId(Thing::ID id)
 	char *p;
 
 	snprintf(_pathBuf, _pathBufSize, "%s/%ld/%ld.json", _basePath, id, id);
-//	fprintf(stderr, "Database::%s: attempting to load %s\n", __FUNCTION__, _pathBuf);
+//	debugf("Database::%s: attempting to load %s\n", __FUNCTION__, _pathBuf);
 	obj = json_load_file(_pathBuf, 0, NULL);
 	if(!obj)
 	{
 		if(errno != ENOENT)
 		{
-			fprintf(stderr, "Database::%s: failed to load %s: %s\n", __FUNCTION__, _pathBuf, strerror(errno));
+			debugf("Database::%s: failed to load %s: %s\n", __FUNCTION__, _pathBuf, strerror(errno));
 		}
 		return NULL;
 	}
@@ -246,7 +254,7 @@ Database::textFromFile(const char *path)
 	{
 		if(errno != ENOENT)
 		{
-			fprintf(stderr, "Database::%s: %s: %s\n", __FUNCTION__, path, strerror(errno));
+			debugf("Database::%s: %s: %s\n", __FUNCTION__, path, strerror(errno));
 		}
 		return NULL;
 	}
@@ -267,7 +275,7 @@ Database::textFromFile(const char *path)
 			p = (char *) realloc(buffer, newSize + 2);
 			if(!p)
 			{
-				fprintf(stderr, "Database::%s: %s: failed to realloc buffer to %lu bytes: %s\n", __FUNCTION__, path, newSize, strerror(errno));
+				debugf("Database::%s: %s: failed to realloc buffer to %lu bytes: %s\n", __FUNCTION__, path, newSize, strerror(errno));
 				free(buffer);
 				close(fd);
 				return NULL;
@@ -276,7 +284,7 @@ Database::textFromFile(const char *path)
 			p = &(buffer[size]);
 			memset(p, 0, newSize - size + 2);
 			size = newSize;
-//			fprintf(stderr, "Database::%s: buffer is now %lu\n", __FUNCTION__, size);
+//			debugf("Database::%s: buffer is now %lu\n", __FUNCTION__, size);
 		}
 		r = read(fd, &(buffer[pos]), size - pos);
 		if(r == 0)
@@ -290,7 +298,7 @@ Database::textFromFile(const char *path)
 			{
 				continue;
 			}
-			fprintf(stderr, "Database::%s: %s: read failed: %s\n", __FUNCTION__, path, strerror(errno));
+			debugf("Database::%s: %s: read failed: %s\n", __FUNCTION__, path, strerror(errno));
 			free(buffer);
 			close(fd);
 			return NULL;
@@ -299,7 +307,7 @@ Database::textFromFile(const char *path)
 		buffer[pos] = 0;
 	}
 	close(fd);
-//	fprintf(stderr, "Database::%s: %s: read %lu bytes\n", __FUNCTION__, path, pos);
+//	debugf("Database::%s: %s: read %lu bytes\n", __FUNCTION__, path, pos);
 	return buffer;
 }
 
@@ -321,16 +329,16 @@ Database::objectFromId(Thing::ID id)
 	thing = Thing::objectFromJSON(obj);
 	if(!thing)
 	{
-		fprintf(stderr, "Database:%s: failed to deserialise object %ld\n", __FUNCTION__, id);
+		debugf("Database:%s: failed to deserialise object %ld\n", __FUNCTION__, id);
 		json_dumpf(obj, stderr, JSON_INDENT(2)|JSON_ENSURE_ASCII|JSON_PRESERVE_ORDER);
-		fprintf(stderr, "\n");
+		debugf("\n");
 		json_decref(obj);
 		return NULL;
 	}
 	json_decref(obj);
 	if(thing->id() != id)
 	{
-		fprintf(stderr, "Database:%s: loaded object's ID (#%ld%c) is not expected #%ld\n", __FUNCTION__, thing->id(), thing->typeChar(), id);
+		debugf("Database:%s: loaded object's ID (#%ld%c) is not expected #%ld\n", __FUNCTION__, thing->id(), thing->typeChar(), id);
 		thing->release();
 		return NULL;
 	}
@@ -346,7 +354,7 @@ Database::storeObject(json_t *obj)
 
 	if((id = json_integer_value(json_object_get(obj, "id"))) <= 0)
 	{
-		fprintf(stderr, "Database::%s: refusing to write object with invalid ID\n", __FUNCTION__);
+		debugf("Database::%s: refusing to write object with invalid ID\n", __FUNCTION__);
 		return false;
 	}
 	if(id > maxId())
@@ -356,26 +364,26 @@ Database::storeObject(json_t *obj)
 	snprintf(_pathBuf, _pathBufSize, "%s/%ld", _basePath, id);
 	if(mkdir(_pathBuf, 0711) < 0 && errno != EEXIST)
 	{
-		fprintf(stderr, "Database::%s: failed to create %s: %s\n", __FUNCTION__, _pathBuf, strerror(errno));
+		debugf("Database::%s: failed to create %s: %s\n", __FUNCTION__, _pathBuf, strerror(errno));
 		return false;
 	}
 	snprintf(_pathBuf, _pathBufSize, "%s/%ld/%ld.json", _basePath, id, id);
 	snprintf(_tmpBuf, _pathBufSize, "%s/%ld/%ld.json.new", _basePath, id, id);
-//	fprintf(stderr, "Database::%s: saving to %s\n", __FUNCTION__, _pathBuf);
+//	debugf("Database::%s: saving to %s\n", __FUNCTION__, _pathBuf);
 	/* this is a shallow copy, because we only want to remove keys */
 	data = json_copy(obj);
 	json_object_del(data, "description");
 	json_object_del(data, "text");
 	if(json_dump_file(data, _tmpBuf, JSON_INDENT(2)|JSON_ENSURE_ASCII|JSON_SORT_KEYS) < 0)
 	{
-		fprintf(stderr, "Database::%s: failed to write to %s: %s\n", __FUNCTION__, _tmpBuf, strerror(errno));
+		debugf("Database::%s: failed to write to %s: %s\n", __FUNCTION__, _tmpBuf, strerror(errno));
 		json_decref(data);
 		return false;
 	}
 	json_decref(data);
 	if(rename(_tmpBuf, _pathBuf))
 	{
-		fprintf(stderr, "Database::%s: failed to rename %s to %s: %s\n", __FUNCTION__, _tmpBuf, _pathBuf, strerror(errno));
+		debugf("Database::%s: failed to rename %s to %s: %s\n", __FUNCTION__, _tmpBuf, _pathBuf, strerror(errno));
 		return false;
 	}
 	_dirty = true;
@@ -410,14 +418,14 @@ Database::writeToFile(const char *pathname, const char *string)
 	f = fopen(_tmpBuf, "wb");
 	if(!f)
 	{
-		fprintf(stderr, "Database::%s: failed to open %s for writing: %s\n", __FUNCTION__, _tmpBuf, strerror(errno));
+		debugf("Database::%s: failed to open %s for writing: %s\n", __FUNCTION__, _tmpBuf, strerror(errno));
 		return false;
 	}
 	fputs(string, f);
 	fclose(f);
 	if(rename(_tmpBuf, pathname))
 	{
-		fprintf(stderr, "Database::%s: failed to rename %s to %s: %s\n", __FUNCTION__, _tmpBuf, pathname, strerror(errno));
+		debugf("Database::%s: failed to rename %s to %s: %s\n", __FUNCTION__, _tmpBuf, pathname, strerror(errno));
 		return false;
 	}
 	return true;
@@ -489,7 +497,7 @@ Database::indexObject(json_t *obj)
 	{
 		json_object_set_new(index, cname, json_integer(id));
 	}
-//	fprintf(stderr, "Database::%s: indexing %s '%s' => #%ld\n", __FUNCTION__, type, cname, id);
+//	debugf("Database::%s: indexing %s '%s' => #%ld\n", __FUNCTION__, type, cname, id);
 	return true;
 }
 
@@ -501,13 +509,13 @@ Database::idFromName(const char *type, const char *name)
 
 	index = indexForType(type);
 	canonicalise(cname, sizeof(cname), name);
-//	fprintf(stderr, "Database::%s: cname='%s'\n", __FUNCTION__, cname);
+//	debugf("Database::%s: cname='%s'\n", __FUNCTION__, cname);
 	if(index)
 	{
 		value = json_object_get(index, cname);
 		if(value && json_integer_value(value) > 0)
 		{
-//			fprintf(stderr, "Database::%s: %s '%s' has the ID #%lld\n", __FUNCTION__, type, name, json_integer_value(value));
+//			debugf("Database::%s: %s '%s' has the ID #%lld\n", __FUNCTION__, type, name, json_integer_value(value));
 			return json_integer_value(value);
 		}
 	}
@@ -520,39 +528,39 @@ Database::checkpoint(void)
 	snprintf(_pathBuf, _pathBufSize, "%s/db.json", _basePath);
 	snprintf(_tmpBuf, _pathBufSize, "%s/db.json.new", _basePath);
 	json_object_set_new(_meta, "lastUpdate", json_integer(time(NULL)));
-//	fprintf(stderr, "Database::%s: saving metadata to %s\n", __FUNCTION__, _pathBuf);
+//	debugf("Database::%s: saving metadata to %s\n", __FUNCTION__, _pathBuf);
 	if(json_dump_file(_meta, _tmpBuf, JSON_INDENT(2)|JSON_ENSURE_ASCII|JSON_SORT_KEYS) < 0)
 	{
-		fprintf(stderr, "Database::%s: failed to write to %s: %s\n", __FUNCTION__, _tmpBuf, strerror(errno));
+		debugf("Database::%s: failed to write to %s: %s\n", __FUNCTION__, _tmpBuf, strerror(errno));
 		return false;
 	}
 	if(rename(_tmpBuf, _pathBuf))
 	{
-		fprintf(stderr, "Database::%s: failed to rename %s to %s: %s\n", __FUNCTION__, _tmpBuf, _pathBuf, strerror(errno));
+		debugf("Database::%s: failed to rename %s to %s: %s\n", __FUNCTION__, _tmpBuf, _pathBuf, strerror(errno));
 		return false;
 	}
 	snprintf(_pathBuf, _pathBufSize, "%s/players.json", _basePath);
 	snprintf(_tmpBuf, _pathBufSize, "%s/players.json.new", _basePath);
 	if(json_dump_file(_playerIndex, _tmpBuf, 0) < 0)
 	{
-		fprintf(stderr, "Database::%s: failed to write to %s: %s\n", __FUNCTION__, _tmpBuf, strerror(errno));
+		debugf("Database::%s: failed to write to %s: %s\n", __FUNCTION__, _tmpBuf, strerror(errno));
 		return false;
 	}
 	if(rename(_tmpBuf, _pathBuf))
 	{
-		fprintf(stderr, "Database::%s: failed to rename %s to %s: %s\n", __FUNCTION__, _tmpBuf, _pathBuf, strerror(errno));
+		debugf("Database::%s: failed to rename %s to %s: %s\n", __FUNCTION__, _tmpBuf, _pathBuf, strerror(errno));
 		return false;
 	}
 	snprintf(_pathBuf, _pathBufSize, "%s/zones.json", _basePath);
 	snprintf(_tmpBuf, _pathBufSize, "%s/zones.json.new", _basePath);
 	if(json_dump_file(_zoneIndex, _tmpBuf, 0) < 0)
 	{
-		fprintf(stderr, "Database::%s: failed to write to %s: %s\n", __FUNCTION__, _tmpBuf, strerror(errno));
+		debugf("Database::%s: failed to write to %s: %s\n", __FUNCTION__, _tmpBuf, strerror(errno));
 		return false;
 	}
 	if(rename(_tmpBuf, _pathBuf))
 	{
-		fprintf(stderr, "Database::%s: failed to rename %s to %s: %s\n", __FUNCTION__, _tmpBuf, _pathBuf, strerror(errno));
+		debugf("Database::%s: failed to rename %s to %s: %s\n", __FUNCTION__, _tmpBuf, _pathBuf, strerror(errno));
 		return false;
 	}
 	_dirty = false;
@@ -576,12 +584,12 @@ Database::migrate(void)
 	{
 		if(!migrateTo(currentVersion + 1))
 		{
-			fprintf(stderr, "Database::%s: migration to version %u failed\n", __FUNCTION__, currentVersion + 1);
+			debugf("Database::%s: migration to version %u failed\n", __FUNCTION__, currentVersion + 1);
 			return false;
 		}
 		if(version() <= currentVersion)
 		{
-			fprintf(stderr, "Database::%s: post-migration version is %u (expected at least %u)\n", __FUNCTION__, version(), currentVersion + 1);
+			debugf("Database::%s: post-migration version is %u (expected at least %u)\n", __FUNCTION__, version(), currentVersion + 1);
 			return false;
 		}
 		checkpoint();
@@ -594,7 +602,7 @@ Database::migrateTo(unsigned newVersion)
 {
 	if(newVersion == 1)
 	{
-		fprintf(stderr, "Database::%s: migrating to version %u\n", __FUNCTION__, newVersion);
+		debugf("Database::%s: migrating to version %u\n", __FUNCTION__, newVersion);
 		if(!json_object_get(_meta, "universe"))
 		{
 			json_object_set_new(_meta, "universe", json_object());
@@ -615,7 +623,7 @@ Database::migrateTo(unsigned newVersion)
 		json_object_set(_meta, "version", json_integer(newVersion));
 		return true;
 	}
-	fprintf(stderr, "Database::%s: unsupported version %u\n", __FUNCTION__, newVersion);
+	debugf("Database::%s: unsupported version %u\n", __FUNCTION__, newVersion);
 	return false;
 }
 

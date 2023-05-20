@@ -5,10 +5,13 @@
 
 #include <dlfcn.h>
 
+#include "WARP/Flux/Diagnostics.hh"
+
 #include "Nexus/Universe.hh"
 #include "Nexus/Module.hh"
 
 using namespace Nexus;
+using namespace WARP::Flux::Diagnostics;
 
 bool
 Module::nameIsValid(const char *name)
@@ -58,13 +61,13 @@ Module::canonicalise(char *buf, size_t buflen, const char *src)
 Module *
 Module::load(Universe *universe, const char *name)
 {
-	fprintf(stderr, "Module::%s: attempting to load '%s'\n", __FUNCTION__, name);
+	debugf("Module::%s: attempting to load '%s'\n", __FUNCTION__, name);
 
 	Module *mod = new Module(universe, name);
 
 	if(!mod->_impl)
 	{
-		fprintf(stderr, "Module::%s: '%s' is not a valid module\n", __FUNCTION__, name);
+		debugf("Module::%s: '%s' is not a valid module\n", __FUNCTION__, name);
 		mod->release();
 		return NULL;
 	}
@@ -92,19 +95,19 @@ Module::Module(Universe *universe, const char *name):
 	_handle = dlopen(_path, RTLD_LOCAL|RTLD_NOW);
 	if(!_handle)
 	{
-		fprintf(stderr, "Module::%s: %s: %s\n", __FUNCTION__, _path, dlerror());
+		debugf("Module::%s: %s: %s\n", __FUNCTION__, _path, dlerror());
 		return;
 	}
 	callback = (ModuleImplementation *(*)(Universe *, Module *)) dlsym(_handle, "nexusModuleImplementation");
 	if(!callback)
 	{
-		fprintf(stderr, "Module::%s: %s: module callback not found\n", __FUNCTION__, _path);
+		debugf("Module::%s: %s: module callback not found\n", __FUNCTION__, _path);
 		return;
 	}
 	_impl = callback(_universe, this);
 	if(!_impl)
 	{
-		fprintf(stderr, "Module::%s: %s: module callback failed\n", __FUNCTION__, _path);
+		debugf("Module::%s: %s: module callback failed\n", __FUNCTION__, _path);
 		return;
 	}
 }
@@ -113,12 +116,12 @@ Module::~Module()
 {
 	if(_impl)
 	{
-		fprintf(stderr, "Module::%s: releasing implementation of %s\n", __FUNCTION__, _cname);
+		debugf("Module::%s: releasing implementation of %s\n", __FUNCTION__, _cname);
 		_impl->release();
 	}
 	if(_handle)
 	{
-		fprintf(stderr, "Module::%s: unloading '%s'\n", __FUNCTION__, _path);
+		debugf("Module::%s: unloading '%s'\n", __FUNCTION__, _path);
 		dlclose(_handle);
 	}
 	free(_name);

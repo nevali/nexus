@@ -4,27 +4,31 @@
 
 #include <jansson.h>
 
+#include "WARP/Flux/Diagnostics.hh"
+
 #include "Nexus/Database.hh"
 #include "Nexus/Thing.hh"
 #include "Nexus/Player.hh"
 #include "Nexus/Universe.hh"
 #include "Nexus/Variable.hh"
 #include "Nexus/Room.hh"
+#include "Nexus/Channel.hh"
 
 using namespace Nexus;
+using namespace WARP::Flux::Diagnostics;
 
 bool
 Universe::migrateTo(unsigned newVersion)
 {
 	if(newVersion == 1)
 	{
-		fprintf(stderr, "Universe::%s: migrating to version %u\n", __FUNCTION__, newVersion);
+		::diagf(DIAG_NOTICE, "Universe::%s: migrating to version %u\n", __FUNCTION__, newVersion);
 		json_object_set_new(_meta, "version", json_integer(newVersion));
 		return true;
 	}
 	if(newVersion == 2)
 	{
-		fprintf(stderr, "Universe::%s: migrating to version %u\n", __FUNCTION__, newVersion);
+		::diagf(DIAG_NOTICE, "Universe::%s: migrating to version %u\n", __FUNCTION__, newVersion);
 
 		if(!_operator)
 		{
@@ -34,7 +38,7 @@ Universe::migrateTo(unsigned newVersion)
 			{
 				if(!thing->isPlayer())
 				{
-					fprintf(stderr, "Universe::%s: object %s was expected to be a Player\n", __FUNCTION__, thing->ident());
+					::diagf(DIAG_CRITICAL, "Universe::%s: object %s was expected to be a Player\n", __FUNCTION__, thing->ident());
 					thing->release();
 					return false;
 				}
@@ -45,31 +49,31 @@ Universe::migrateTo(unsigned newVersion)
 				_operator = newPlayer("Operator");
 				if(!_operator)
 				{
-					fprintf(stderr, "Universe::%s: failed to create new 'Operator' Player object\n", __FUNCTION__);
+					::diagf(DIAG_CRITICAL, "Universe::%s: failed to create new 'Operator' Player object\n", __FUNCTION__);
 					return false;
 				}
 				_operator->setId(1);
 				if(_operator->id() != 1)
 				{
-					fprintf(stderr, "Universe::%s: failed to set Operator's ID to #1P (is %s)\n", __FUNCTION__, _operator->ident());
+					::diagf(DIAG_CRITICAL, "Universe::%s: failed to set Operator's ID to #1P (is %s)\n", __FUNCTION__, _operator->ident());
 					return false;
 				}
 			}
 		}
 		if(!_operator->setFlag("system"))
 		{
-			fprintf(stderr, "Universe::%s: failed to set Operator (%s) as SYSTEM\n", __FUNCTION__, _operator->ident());
+			::diagf(DIAG_CRITICAL, "Universe::%s: failed to set Operator (%s) as SYSTEM\n", __FUNCTION__, _operator->ident());
 			return false;
 		}
 		if(!_operator->setFlag("immortal"))
 		{
-			fprintf(stderr, "Universe::%s: failed to set Operator (%s) as IMMORTAL\n", __FUNCTION__, _operator->ident());
+			::diagf(DIAG_CRITICAL, "Universe::%s: failed to set Operator (%s) as IMMORTAL\n", __FUNCTION__, _operator->ident());
 			return false;
 		}
 		_operator->dumpf(stderr);
 		if(!_operator->sync())
 		{
-			fprintf(stderr, "Universe::%s: failed to sync Operator\n", __FUNCTION__);
+			::diagf(DIAG_CRITICAL, "Universe::%s: failed to sync Operator\n", __FUNCTION__);
 			return false;
 		}
 		json_object_set_new(_meta, "version", json_integer(newVersion));
@@ -77,7 +81,7 @@ Universe::migrateTo(unsigned newVersion)
 	}
 	if(newVersion == 3)
 	{
-		fprintf(stderr, "Universe::%s: migrating to version %u\n", __FUNCTION__, newVersion);
+		::diagf(DIAG_NOTICE, "Universe::%s: migrating to version %u\n", __FUNCTION__, newVersion);
 		if(!json_object_get(_meta, "name"))
 		{
 			json_object_set_new(_meta, "name", json_string("Unnamed Universe"));
@@ -87,7 +91,7 @@ Universe::migrateTo(unsigned newVersion)
 	}
 	if(newVersion == 4)
 	{
-		fprintf(stderr, "Universe::%s: migrating to version %u\n", __FUNCTION__, newVersion);
+		::diagf(DIAG_NOTICE, "Universe::%s: migrating to version %u\n", __FUNCTION__, newVersion);
 		if(!_root)
 		{
 			Thing *thing = _db->objectFromId(2);
@@ -96,7 +100,7 @@ Universe::migrateTo(unsigned newVersion)
 			{
 				if(!thing->isZone())
 				{
-					fprintf(stderr, "Universe::%s: object %s was expected to be a Zone\n", __FUNCTION__, thing->ident());
+					::diagf(DIAG_CRITICAL, "Universe::%s: object %s was expected to be a Zone\n", __FUNCTION__, thing->ident());
 					thing->release();
 					return false;
 				}
@@ -107,12 +111,12 @@ Universe::migrateTo(unsigned newVersion)
 				_root = newZone("Root");
 				if(!_root)
 				{
-					fprintf(stderr, "Universe::%s: failed to create new 'Root' Container object\n", __FUNCTION__);
+					::diagf(DIAG_CRITICAL, "Universe::%s: failed to create new 'Root' Container object\n", __FUNCTION__);
 					return false;
 				}
 				if(!_root->setId(2))
 				{
-					fprintf(stderr, "Universe::%s: failed to set Root's ID to #2 (is %s)\n", __FUNCTION__, _root->ident());
+					::diagf(DIAG_CRITICAL, "Universe::%s: failed to set Root's ID to #2 (is %s)\n", __FUNCTION__, _root->ident());
 					return false;
 				}
 				_root->setDescription(
@@ -124,23 +128,23 @@ Universe::migrateTo(unsigned newVersion)
 		}
 		if(!_root->setFlag("system"))
 		{
-			fprintf(stderr, "Universe::%s: failed to set Root (%s) as SYSTEM\n", __FUNCTION__, _root->ident());
+			::diagf(DIAG_CRITICAL, "Universe::%s: failed to set Root (%s) as SYSTEM\n", __FUNCTION__, _root->ident());
 			return false;
 		}
 		if(!_root->setFlag("fixed"))
 		{
-			fprintf(stderr, "Universe::%s: failed to set Root (%s) as FIXED\n", __FUNCTION__, _root->ident());
+			::diagf(DIAG_CRITICAL, "Universe::%s: failed to set Root (%s) as FIXED\n", __FUNCTION__, _root->ident());
 			return false;
 		}
 		if(!_root->setFlag("hidden"))
 		{
-			fprintf(stderr, "Universe::%s: failed to set Root (%s) as HIDDEN\n", __FUNCTION__, _root->ident());
+			::diagf(DIAG_CRITICAL, "Universe::%s: failed to set Root (%s) as HIDDEN\n", __FUNCTION__, _root->ident());
 			return false;
 		}
 //		_root->dumpf(stderr);
 		if(!_root->sync())
 		{
-			fprintf(stderr, "Universe::%s: failed to sync Root\n", __FUNCTION__);
+			::diagf(DIAG_CRITICAL, "Universe::%s: failed to sync Root\n", __FUNCTION__);
 			return false;
 		}
 		json_object_set_new(_meta, "version", json_integer(newVersion));
@@ -148,39 +152,39 @@ Universe::migrateTo(unsigned newVersion)
 	}
 	if(newVersion == 5)
 	{
-		fprintf(stderr, "Universe::%s: migrating to version %u\n", __FUNCTION__, newVersion);
+		::diagf(DIAG_NOTICE, "Universe::%s: migrating to version %u\n", __FUNCTION__, newVersion);
 
 		if(!_system)
 		{		
 			_system = newZone("System");
 			if(!_system)
 			{
-				fprintf(stderr, "Universe::%s: failed to create a new Zone named 'System'\n", __FUNCTION__);
+				::diagf(DIAG_CRITICAL, "Universe::%s: failed to create a new Zone named 'System'\n", __FUNCTION__);
 				return false;
 			}
 			if(!_system->setId(3))
 			{
-				fprintf(stderr, "Universe::%s: failed to set System's ID to #3 (is %s)\n", __FUNCTION__, _system->ident());
+				::diagf(DIAG_CRITICAL, "Universe::%s: failed to set System's ID to #3 (is %s)\n", __FUNCTION__, _system->ident());
 				return false;
 			}
 			if(!_system->setLocation(_root))
 			{
-				fprintf(stderr, "Universe::%s: failed to set System's (%s) location to Root\n", __FUNCTION__, _system->ident());
+				::diagf(DIAG_CRITICAL, "Universe::%s: failed to set System's (%s) location to Root\n", __FUNCTION__, _system->ident());
 			}
 		}
 		if(!_system->setFlag("system"))
 		{
-			fprintf(stderr, "Universe::%s: failed to set System (%s) as SYSTEM\n", __FUNCTION__, _system->ident());
+			::diagf(DIAG_CRITICAL, "Universe::%s: failed to set System (%s) as SYSTEM\n", __FUNCTION__, _system->ident());
 			return false;
 		}
 		if(!_system->setFlag("fixed"))
 		{
-			fprintf(stderr, "Universe::%s: failed to set System (%s) as FIXED\n", __FUNCTION__, _system->ident());
+			::diagf(DIAG_CRITICAL, "Universe::%s: failed to set System (%s) as FIXED\n", __FUNCTION__, _system->ident());
 			return false;
 		}
 		if(!_system->sync())
 		{
-			fprintf(stderr, "Universe::%s: failed to sync System (%s)\n", __FUNCTION__, _system->ident());
+			::diagf(DIAG_CRITICAL, "Universe::%s: failed to sync System (%s)\n", __FUNCTION__, _system->ident());
 			return false;
 		}
 		json_object_set_new(_meta, "version", json_integer(newVersion));
@@ -190,7 +194,7 @@ Universe::migrateTo(unsigned newVersion)
 	{
 		Thing *thing;
 
-		fprintf(stderr, "Universe::%s: migrating to version %u\n", __FUNCTION__, newVersion);
+		::diagf(DIAG_NOTICE, "Universe::%s: migrating to version %u\n", __FUNCTION__, newVersion);
 		
 		thing = systemObjectNamed("messages");
 		if(!thing)
@@ -202,17 +206,17 @@ Universe::migrateTo(unsigned newVersion)
 		}
 		if(!thing->setFlag("system"))
 		{
-			fprintf(stderr, "Universe::%s: failed to set Messages (%s) as SYSTEM\n", __FUNCTION__, thing->ident());
+			::diagf(DIAG_CRITICAL, "Universe::%s: failed to set Messages (%s) as SYSTEM\n", __FUNCTION__, thing->ident());
 			return false;
 		}
 		if(!thing->setFlag("fixed"))
 		{
-			fprintf(stderr, "Universe::%s: failed to set Messages (%s) as FIXED\n", __FUNCTION__, thing->ident());
+			::diagf(DIAG_CRITICAL, "Universe::%s: failed to set Messages (%s) as FIXED\n", __FUNCTION__, thing->ident());
 			return false;
 		}
 		if(!thing->sync())
 		{
-			fprintf(stderr, "Universe::%s: failed to sync Messges Container\n", __FUNCTION__);
+			::diagf(DIAG_CRITICAL, "Universe::%s: failed to sync Messges Container\n", __FUNCTION__);
 			return false;
 		}
 		thing->sync();
@@ -226,18 +230,18 @@ Universe::migrateTo(unsigned newVersion)
 		Thing *thing;
 		Variable *var;
 
-		fprintf(stderr, "Universe::%s: migrating to version %u\n", __FUNCTION__, newVersion);
+		::diagf(DIAG_NOTICE, "Universe::%s: migrating to version %u\n", __FUNCTION__, newVersion);
 		
 		thing = systemObjectNamed("messages");
 		if(!thing)
 		{
-			fprintf(stderr, "Universe::%s: cannot find 'messages' system object\n", __FUNCTION__);
+			::diagf(DIAG_CRITICAL, "Universe::%s: cannot find 'messages' system object\n", __FUNCTION__);
 			return false;
 		}
 		messages = thing->asContainer();
 		if(!messages)
 		{
-			fprintf(stderr, "Universe::%s: 'messages' system object (%s) is not a container\n", __FUNCTION__, thing->ident());
+			::diagf(DIAG_CRITICAL, "Universe::%s: 'messages' system object (%s) is not a container\n", __FUNCTION__, thing->ident());
 			thing->release();
 			return false;
 		}
@@ -263,7 +267,62 @@ Universe::migrateTo(unsigned newVersion)
 		json_object_set_new(_meta, "version", json_integer(newVersion));
 		return true;
 	}
+	if(newVersion == 8)
+	{
+		Channel *channel;
 
-	fprintf(stderr, "Database::%s: unsupported version %u\n", __FUNCTION__, newVersion);
+		channel = newChannel();
+		channel->setId(10);
+		channel->setFlag("system");
+		channel->setFlag("fixed");
+		channel->setName("*GLOBAL");
+		channel->setLocation(_system);
+		channel->release();
+		json_object_set_new(_meta, "version", json_integer(newVersion));
+		return true;
+	}
+	if(newVersion == 9)
+	{
+		Channel *channel;
+
+		channel = newChannel();
+		channel->setId(11);
+		channel->setFlag("system");
+		channel->setFlag("fixed");
+		channel->setName("*DEBUG");
+		channel->setLocation(_system);
+		channel->release();
+		json_object_set_new(_meta, "version", json_integer(newVersion));
+		return true;
+	}
+	if(newVersion == 10)
+	{
+		Channel *channel;
+
+		channel = newChannel();
+		channel->setId(12);
+		channel->setFlag("system");
+		channel->setFlag("fixed");
+		channel->setName("*AUDIT");
+		channel->setLocation(_system);
+		channel->release();
+		json_object_set_new(_meta, "version", json_integer(newVersion));
+		return true;
+	}
+	if(newVersion == 11)
+	{
+		_operator->setFlag("invulnerable");
+		_operator->setFlag("builder");
+		_operator->setFlag("omnipotent");
+		_operator->setFlag("xray");
+		_operator->setFlag("debugger");
+		_operator->setFlag("auditor");
+		_operator->setFlag("dba");
+		_operator->setFlag("engineer");
+		_operator->sync();
+		json_object_set_new(_meta, "version", json_integer(newVersion));
+		return true;
+	}
+	::diagf(DIAG_CRITICAL, "Database::%s: unsupported version %u\n", __FUNCTION__, newVersion);
 	return false;
 }

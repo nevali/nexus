@@ -13,6 +13,8 @@
 #include "Nexus/Database.hh"
 #include "Nexus/Universe.hh"
 
+using namespace WARP::Flux::Diagnostics;
+
 namespace Nexus
 {
 	namespace Tools
@@ -70,18 +72,21 @@ Builder::initialise(void)
 	}
 	if(!_universe->migrate())
 	{
-		fprintf(stderr, "%s: %s: failed to migrate universe from version %u to version %u\n", argv(0), argv(1), _universe->version(), Nexus::Universe::UVERSION);
+		::diagf(DIAG_CRITICAL, "%s: %s: failed to migrate universe from version %u to version %u\n", argv(0), argv(1), _universe->version(), Nexus::Universe::UVERSION);
 		return 4;
 	}
+	setDiagnosticLevel(DIAG_DEBUG);
+	setDiagnosticCallback(Universe::diagnosticCallback, _universe);
+	::debugf("diagnostic callback installed\n");
 	_player = _universe->playerFromName("operator");
 	if(!_player)
 	{
-		fprintf(stderr, "failed to load initial player\n");
+		::diagf(DIAG_CRITICAL, "failed to load initial player\n");
 		return 10;
 	}
 	if(!_universe->activateModules())
 	{
-		fprintf(stderr, "%s: %s: warning: failed to activate one or more modules\n", argv(0), argv(1));
+		::diagf(DIAG_CRITICAL, "%s: %s: warning: failed to activate one or more modules\n", argv(0), argv(1));
 	}
 	return 0;
 }
@@ -111,6 +116,7 @@ Builder::runLoopEnded(WARP::Flux::Object *sender, WARP::Flux::RunLoop *loop)
 
 	_universe->suspend();
 	_universe->checkpoint();
+	setDiagnosticCallback(NULL, NULL);
 }
 
 void
@@ -141,18 +147,18 @@ Builder::processArgs(void)
 
 	if(argc() != 2)
 	{
-		fprintf(stderr, "Usage: %s DB-PATH\n", argv(0));
+		::diagf(DIAG_NOTICE, "Usage: %s DB-PATH\n", argv(0));
 		return false;
 	}
 	db = Nexus::Database::open(argv(1));
 	if(!db)
 	{
-		fprintf(stderr, "%s: %s: %s\n", argv(0), argv(1), strerror(errno));
+		::diagf(DIAG_CRITICAL, "%s: %s: %s\n", argv(0), argv(1), strerror(errno));
 		return false;
 	}
 	if(db->version() < Nexus::Database::DBVERSION)
 	{
-		fprintf(stderr, "%s: %s: database is an old version (%u) and must be migrated to version %u\nUse 'nexus-migratedb %s'\n", argv(0), argv(1), db->version(), Nexus::Database::DBVERSION, argv(1));
+		::diagf(DIAG_CRITICAL, "%s: %s: database is an old version (%u) and must be migrated to version %u\nUse 'nexus-migratedb %s'\n", argv(0), argv(1), db->version(), Nexus::Database::DBVERSION, argv(1));
 		return false;
 	}
 	_universe = new Nexus::Universe(db);

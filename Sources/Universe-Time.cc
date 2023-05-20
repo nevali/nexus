@@ -1,8 +1,11 @@
 #include <cstdio>
 
+#include "WARP/Flux/Diagnostics.hh"
+
 #include "Nexus/Universe.hh"
 
 using namespace Nexus;
+using namespace WARP::Flux::Diagnostics;
 
 /* 1 usec = 1/1000000th of a second */
 static const unsigned long sec_usec = 1000000;
@@ -54,7 +57,7 @@ Universe::tick(void)
 	if(latest - _now < (long long) tick_min)
 	{
 		/* not enough time has elapsed between ticks for us to do anything */
-//		fprintf(stderr, "latest - now = %lld, which is less than %lu\n", latest - _now, tick_min);
+//		::debugf("latest - now = %lld, which is less than %lu\n", latest - _now, tick_min);
 		return _now;
 	}
 	/* there has been enough of an increment, update the clocks */
@@ -84,11 +87,11 @@ Universe::updateClocks(void)
 		*/
 		_age = _ageAtLaunch + (latest - _launchTime);
 		json_object_set_new(_meta, "age", json_integer(_age));
-//		fprintf(stderr, "Universe::%s: RUNNING: now=%lld, step=%lld, age=%lld\n", __FUNCTION__, _now, step, _age);
+//		::debugf("Universe::%s: RUNNING: now=%lld, step=%lld, age=%lld\n", __FUNCTION__, _now, step, _age);
 	}
 	else
 	{
-//		fprintf(stderr, "Universe::%s: SUSPENDED: tv_sec=%lu, tv_usec=%lu, prev=%lld, now=%lld, step=%lld\n", __FUNCTION__, _wallClock.tv_sec, _wallClock.tv_usec, _now, latest, step);
+//		::debugf("Universe::%s: SUSPENDED: tv_sec=%lu, tv_usec=%lu, prev=%lld, now=%lld, step=%lld\n", __FUNCTION__, _wallClock.tv_sec, _wallClock.tv_usec, _now, latest, step);
 	}
 	_now = latest;
 }
@@ -107,7 +110,7 @@ Universe::suspend(void)
 		return;
 	}
 	updateClocks();
-	fprintf(stderr, "Universe::%s: suspending Universe at %lld, aged %lld\n", __FUNCTION__, _now, _age);
+	::debugf("Universe::%s: suspending Universe at %lld, aged %lld\n", __FUNCTION__, _now, _age);
 	_running = false;
 	_ageAtLaunch = _age;
 	_launchTime = _now;
@@ -120,7 +123,7 @@ Universe::resume(void)
 	{
 		return;
 	}
-	fprintf(stderr, "Universe::%s: resuming Universe at %lld, aged %lld (at launch %lld)\n", __FUNCTION__, _now, _age, _ageAtLaunch);
+	::debugf("Universe::%s: resuming Universe at %lld, aged %lld (at launch %lld)\n", __FUNCTION__, _now, _age, _ageAtLaunch);
 	_launchTime = _now;
 	_running = true;
 	updateClocks();
