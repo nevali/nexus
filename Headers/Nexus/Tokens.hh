@@ -35,7 +35,7 @@ namespace Nexus
 	class Tokens: public WARP::Flux::PointerArray
 	{
 		public:
-			Tokens(const char *source);
+			Tokens(const char *source, size_t length = -1);
 			const Token *tokenAtIndex(size_t index) const;
 			virtual void dump(void);
 			/* accessors for token text */

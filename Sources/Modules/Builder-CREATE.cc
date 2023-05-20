@@ -14,13 +14,13 @@
 using namespace Nexus::Modules::Builder;
 
 bool
-CREATE::execute(Actor *actor)
+CREATE::execute(ExecutionContext *ctx)
 {
 	const char *name;
 
 	if(argc() < 2 || argc() > 3 || argv(1)[0] != '/')
 	{
-		actor->send("Usage: @CREATE /TYPE [NAME]\n");
+		ctx->who->send("Usage: @CREATE /TYPE [NAME]\n");
 		return false;
 	}
 	if(argc() > 2)
@@ -33,28 +33,28 @@ CREATE::execute(Actor *actor)
 	}
 	if(!strcasecmp(argv(1), "/thing"))
 	{
-		return createThing(actor, name);
+		return createThing(ctx, name);
 	}
 	if(!strcasecmp(argv(1), "/zone"))
 	{
-		return createZone(actor, name);
+		return createZone(ctx, name);
 	}
 	if(!strcasecmp(argv(1), "/room"))
 	{
-		return createRoom(actor, name);
+		return createRoom(ctx, name);
 	}
 	if(!strcasecmp(argv(1), "/portal"))
 	{
-		return createPortal(actor, name);
+		return createPortal(ctx, name);
 	}
-	actor->sendf("Sorry, I don't know how to create a '%s'\n", argv(1) + 1);
+	ctx->who->sendf("Sorry, I don't know how to create a '%s'\n", argv(1) + 1);
 	return false;
 }
 
 bool
-CREATE::createZone(Actor *actor, const char *name)
+CREATE::createZone(ExecutionContext *ctx, const char *name)
 {
-	Zone *newZone, *parent = actor->zone();
+	Zone *newZone, *parent = ctx->who->zone();
 	Room *entrance;
 	Variable *settings;
 	json_t *data;
@@ -69,7 +69,7 @@ CREATE::createZone(Actor *actor, const char *name)
 	}
 	if(!parent)
 	{
-		actor->send("Cannot create a new zone because you do are not in a zone\n");
+		ctx->who->send("Cannot create a new zone because you do are not in a zone\n");
 		return false;
 	}
 	if(parent->id() == Thing::ID_LIMBO)
@@ -85,21 +85,21 @@ CREATE::createZone(Actor *actor, const char *name)
 	newZone = _universe->newZone(name, true, parent);
 	if(!newZone)
 	{
-		actor->sendf("Unable to create new Zone within %s (%s)\n", parent->displayName(), parent->ident());
+		ctx->who->sendf("Unable to create new Zone within %s (%s)\n", parent->displayName(), parent->ident());
 		parent->release();
 		return false;
 	}
-	newZone->setOwner(actor);
+	newZone->setOwner(ctx->who);
 	newZone->setDescription("This is a brand new zone which can be customised to your needs.\n");
-	actor->sendf("New Zone %s (%s) created within %s (%s)\n", newZone->displayName(), newZone->ident(), parent->displayName(), parent->ident());
+	ctx->who->sendf("New Zone %s (%s) created within %s (%s)\n", newZone->displayName(), newZone->ident(), parent->displayName(), parent->ident());
 	entrance = _universe->newRoom("Entrance", true, newZone);
 	if(!entrance)
 	{
-		actor->sendf("Failed to create entrance to new Zone %s (%s)\n", newZone->displayName(), newZone->ident());
+		ctx->who->sendf("Failed to create entrance to new Zone %s (%s)\n", newZone->displayName(), newZone->ident());
 	}
 	else
 	{
-		entrance->setOwner(actor);
+		entrance->setOwner(ctx->who);
 		entrance->setDescription(
 			"Greetings, traveller! Welcome to this brand new entrance room, in\n"
 			"your brand new zone!\n"
@@ -111,16 +111,16 @@ CREATE::createZone(Actor *actor, const char *name)
 			"You should edit this description as soon as you can, lest you expire\n"
 			"from boredom... or paint fumes.\n"
 		);
-		actor->sendf("New Room %s (%s) created within %s %s\n", entrance->displayName(), entrance->ident(), newZone->displayName(), newZone->ident());
+		ctx->who->sendf("New Room %s (%s) created within %s %s\n", entrance->displayName(), entrance->ident(), newZone->displayName(), newZone->ident());
 	}
 	settings = _universe->newVariable("Settings", true, newZone);
 	if(!settings)
 	{
-		actor->sendf("Failed to create Settings object in new Zone %s (%s)\n", newZone->displayName(), newZone->ident());
+		ctx->who->sendf("Failed to create Settings object in new Zone %s (%s)\n", newZone->displayName(), newZone->ident());
 	}
 	else
 	{
-		settings->setOwner(actor);
+		settings->setOwner(ctx->who);
 		data = json_object();
 		if(entrance)
 		{
@@ -143,69 +143,69 @@ CREATE::createZone(Actor *actor, const char *name)
 }
 
 bool
-CREATE::createRoom(Actor *actor, const char *name)
+CREATE::createRoom(ExecutionContext *ctx, const char *name)
 {
-	Zone *parent = actor->zone();
+	Zone *parent = ctx->who->zone();
 	Room *newRoom;
 
 	if(!parent)
 	{
-		actor->send("Cannot create a new room because you do are not in a zone\n");
+		ctx->who->send("Cannot create a new room because you do are not in a zone\n");
 		return false;
 	}
 	newRoom = _universe->newRoom(name, true, parent);
 	if(!newRoom)
 	{
-		actor->sendf("Unable to create new Room within %s (%s)\n", parent->displayName(), parent->ident());
+		ctx->who->sendf("Unable to create new Room within %s (%s)\n", parent->displayName(), parent->ident());
 		parent->release();
 		return false;
 	}
-	newRoom->setOwner(actor);
+	newRoom->setOwner(ctx->who);
 	newRoom->setDescription("This is a brand new room, ready for decorating!\n");
-	actor->sendf("New Room %s (%s) created within %s (%s)\n", newRoom->displayName(), newRoom->ident(), parent->displayName(), parent->ident());
+	ctx->who->sendf("New Room %s (%s) created within %s (%s)\n", newRoom->displayName(), newRoom->ident(), parent->displayName(), parent->ident());
 	newRoom->release();
 	parent->release();
 	return true;			
 }
 
 bool
-CREATE::createPortal(Actor *actor, const char *name)
+CREATE::createPortal(ExecutionContext *ctx, const char *name)
 {
-	Container *parent = actor->location();
+	Container *parent = ctx->who->location();
 	Portal *newPortal;
 
 	if(!parent)
 	{
-		actor->send("Cannot create a new portal because you do not seem to be anywhere\n");
+		ctx->who->send("Cannot create a new portal because you do not seem to be anywhere\n");
 		return false;
 	}
 	newPortal = _universe->newPortal(name, true, parent);
 	if(!newPortal)
 	{
-		actor->sendf("Unable to create new Portal within %s (%s)\n", parent->displayName(), parent->ident());
+		ctx->who->sendf("Unable to create new Portal within %s (%s)\n", parent->displayName(), parent->ident());
 		parent->release();
 		return false;
 	}
-	newPortal->setOwner(actor);
-	actor->sendf("New Portal %s (%s) created within %s (%s)\n", newPortal->displayName(), newPortal->ident(), parent->displayName(), parent->ident());
+	newPortal->setOwner(ctx->who);
+	ctx->who->sendf("New Portal %s (%s) created within %s (%s)\n", newPortal->displayName(), newPortal->ident(), parent->displayName(), parent->ident());
 	newPortal->release();
 	parent->release();
 	return true;
 }
 
 bool
-CREATE::createThing(Actor *actor, const char *name)
+CREATE::createThing(ExecutionContext *ctx, const char *name)
 {
 	Thing *newThing;
 
-	newThing = _universe->newThing(name, true, actor);
+	newThing = _universe->newThing(name, true, ctx->who);
 	if(!newThing)
 	{
-		actor->sendf("Unable to create new Thing within %s (%s)\n", actor->displayName(), actor->ident());
+		ctx->who->sendf("Unable to create new Thing within %s (%s)\n", ctx->who->displayName(), ctx->who->ident());
 		return false;
 	}
-	newThing->setOwner(actor);
-	actor->sendf("New Thing %s (%s) created within %s (%s)\n", newThing->displayName(), newThing->ident(), actor->displayName(), actor->ident());
+	newThing->setOwner(ctx->who);
+	ctx->who->sendf("New Thing %s (%s) created within %s (%s)\n", newThing->displayName(), newThing->ident(), ctx->who->displayName(), ctx->who->ident());
 	newThing->release();
 	return true;
 }

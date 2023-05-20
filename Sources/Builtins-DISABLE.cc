@@ -5,18 +5,18 @@
 using namespace Nexus;
 
 bool
-Builtins::DISABLE::execute(Actor *who)
+Builtins::DISABLE::execute(ExecutionContext *ctx)
 {
 	if(argc() != 2)
 	{
-		who->send("Usage: @DISABLE MODULE\n");
+		ctx->who->send("Usage: @DISABLE MODULE\n");
 		return false;
 	}
 	if(!_universe->disableModule(argv(1)))
 	{
-		who->sendf("Module '%s' could not be disabled\n", argv(1));
+		ctx->who->sendf("Module '%s' could not be disabled\n", argv(1));
 		return false;
 	}
-	who->sendf("Module '%s' disabled\n", argv(1));
+	ctx->who->sendf("Module '%s' disabled\n", argv(1));
 	return true;
 }

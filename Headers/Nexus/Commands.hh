@@ -13,6 +13,20 @@ namespace Nexus
 	class Parser;
 	class Tokens;
 
+	struct ExecutionContext
+	{
+		/* Who is performing the command */
+		Actor *who;
+		/* The boolean result of the command (true = succeeded, false = failed) */
+		bool result;
+		/* The tokens that made up this command */
+		Tokens *tokens;
+		
+		ExecutionContext(Actor *actor);
+		~ExecutionContext();
+		void setTokens(Tokens *newTokens);
+	};
+
 	struct CommandEntry
 	{
 		typedef enum
@@ -45,7 +59,7 @@ namespace Nexus
 			Parser(Universe *universe);
 			virtual ~Parser();
 		public:
-			virtual Command *parse(Actor *who, const char *commandLine) = 0;
+			virtual Command *parse(ExecutionContext *context, const char *commandLine, size_t length) = 0;
 			virtual size_t commandCount(void) const { return _ncommands; }
 			virtual CommandEntry *commandAtIndex(size_t index)
 			{
@@ -75,7 +89,7 @@ namespace Nexus
 		public:
 			BuiltinsParser(Universe *universe);
 		public:
-			virtual Command *parse(Actor *who, const char *commandLine);
+			virtual Command *parse(ExecutionContext *context, const char *commandLine, size_t length);
 	};
 
 	/* subclasses provide different implementations, instances
@@ -89,7 +103,7 @@ namespace Nexus
 			Command(Parser *parser, Tokens *tokens);
 			virtual ~Command();
 		public:
-			virtual bool execute(Actor *actor) = 0;
+			virtual bool execute(ExecutionContext *context) = 0;
 		protected:
 			int argc(void) const;
 			const char *argv(size_t index) const;
@@ -105,7 +119,7 @@ namespace Nexus
 		public: \
 			static Command *construct(Parser *parser, Tokens *tokens) { return new name(parser, tokens); } \
 			name(Parser *parser, Tokens *tokens): Command(parser, tokens) { } \
-			virtual bool execute(Actor *actor); \
+			virtual bool execute(ExecutionContext *context); \
 			extra \
 	}
 # define DECLARE_COMMAND(name) DECLARE_COMMAND_(name, /* */)

@@ -8,7 +8,7 @@ using namespace Nexus;
 using namespace Nexus::Modules::Builder;
 
 bool
-FLAG::execute(Actor *actor)
+FLAG::execute(ExecutionContext *ctx)
 {
 	Thing *thing;
 	const char *flag;
@@ -16,7 +16,7 @@ FLAG::execute(Actor *actor)
 
 	if(argc() < 3 || argc() > 4)
 	{
-		actor->send("Usage: @FLAG TARGET FLAG [on|off]\n");
+		ctx->who->send("Usage: @FLAG TARGET FLAG [on|off]\n");
 		return false;
 	}
 	flag = argv(2);
@@ -32,7 +32,7 @@ FLAG::execute(Actor *actor)
 		}
 		else
 		{
-			actor->sendf("Sorry, I don't understand '%s'\n", argv(3));
+			ctx->who->sendf("Sorry, I don't understand '%s'\n", argv(3));
 			return false;
 		}
 	}
@@ -40,17 +40,17 @@ FLAG::execute(Actor *actor)
 	{
 		onOff = true;
 	}
-	if(!(thing = actor->resolveIdOrBuiltin(argv(1))))
+	if(!(thing = ctx->who->resolveIdOrBuiltin(argv(1))))
 	{
-		actor->sendf("Sorry, I can't find '%s'\n", argv(1));
+		ctx->who->sendf("Sorry, I can't find '%s'\n", argv(1));
 		return false;
 	}
-	if(thing->flag(actor, flag, onOff))
+	if(thing->flag(ctx->who, flag, onOff))
 	{
 		thing->release();
 		return true;
 	}
-	actor->sendf("Sorry, I can't set the %s flag of %s (%s)\n", flag, thing->displayName(), thing->ident());
+	ctx->who->sendf("Sorry, I can't set the %s flag of %s (%s)\n", flag, thing->displayName(), thing->ident());
 	thing->release();
 	return false;
 }

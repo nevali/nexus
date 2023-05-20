@@ -4,9 +4,9 @@
 using namespace Nexus;
 
 bool
-Builtins::COMMANDS::execute(Actor *actor)
+Builtins::COMMANDS::execute(ExecutionContext *ctx)
 {
-	actor->send("=[ Built-in Commands ]=================================================\n");
+	ctx->who->send("=[ Built-in Commands ]=================================================\n");
 	for(size_t c = 0 ; c < _parser->commandCount(); c++)
 	{
 		CommandEntry *entry = _parser->commandAtIndex(c);
@@ -14,8 +14,8 @@ Builtins::COMMANDS::execute(Actor *actor)
 		{
 			continue;
 		}
-		actor->sendf("  @%-20s  %s\n", entry->name, (entry->desc ? entry->desc : ""));
+		ctx->who->sendf("  @%-20s  %s\n", entry->name, (entry->desc ? entry->desc : ""));
 	}	
-	actor->send("=======================================================================\n");
+	ctx->who->send("=======================================================================\n");
 	return true;
 }

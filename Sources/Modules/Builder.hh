@@ -21,10 +21,10 @@ namespace Nexus
 			};
 
 			DECLARE_COMMAND_(CREATE,
-				bool createThing(Actor *who, const char *name);
-				bool createZone(Actor *who, const char *name);
-				bool createRoom(Actor *who, const char *name);
-				bool createPortal(Actor *who, const char *name);
+				bool createThing(ExecutionContext *ctx, const char *name);
+				bool createZone(ExecutionContext *ctx, const char *name);
+				bool createRoom(ExecutionContext *ctx, const char *name);
+				bool createPortal(ExecutionContext *ctx, const char *name);
 			);
 			DECLARE_COMMAND(DESTROY);
 			DECLARE_COMMAND(EXAMINE);

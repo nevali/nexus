@@ -2,11 +2,55 @@
 #include <cstdlib>
 #include <cctype>
 
+#include "WARP/Flux/Diagnostics.hh"
+
 #include "Nexus/Commands.hh"
 #include "Nexus/Universe.hh"
 #include "Nexus/Tokens.hh"
+#include "Nexus/Actor.hh"
 
 using namespace Nexus;
+using namespace WARP::Flux::Diagnostics;
+
+ExecutionContext::ExecutionContext(Actor *actor):
+	who(actor),
+	result(false),
+	tokens(NULL)
+{
+	if(who)
+	{
+		who->retain();
+	}
+}
+
+ExecutionContext::~ExecutionContext()
+{
+	if(who)
+	{
+		who->release();
+	}
+	if(tokens)
+	{
+		tokens->release();
+	}
+}
+
+void
+ExecutionContext::setTokens(Tokens *newTokens)
+{
+	if(newTokens != tokens)
+	{
+		if(newTokens)
+		{
+			newTokens->retain();
+		}
+		if(tokens)
+		{
+			tokens->release();
+		}
+		tokens = newTokens;
+	}
+}
 
 Command::Command(Parser *parser, Tokens *tokens):
 	Object(),

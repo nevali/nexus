@@ -18,33 +18,33 @@ typedef struct
 } HelpEntry;
 
 bool
-HELP::execute(Actor *actor)
+HELP::execute(ExecutionContext *ctx)
 {
 	if(argc() < 2)
 	{
-		return intro(actor);
+		return intro(ctx);
 	}
 	if(!strcasecmp(argv(1), "intro") || !strcasecmp(argv(1), "introduction") || !strcasecmp(argv(1), "contents"))
 	{
-		return intro(actor);
+		return intro(ctx);
 	}
 	if(!strcasecmp(argv(1), "disclaim") || !strcasecmp(argv(1), "disclaimer") || !strcasecmp(argv(1), "disclaimers"))
 	{
-		return disclaimers(actor);
+		return disclaimers(ctx);
 	}
-	actor->sendf("Sorry, I can't find an Operator's Guide topic named '%s'\n", argv(1));
+	ctx->who->sendf("Sorry, I can't find an Operator's Guide topic named '%s'\n", argv(1));
 	return false;
 }
 
 bool
-HELP::intro(Actor *actor)
+HELP::intro(ExecutionContext *ctx)
 {
-	actor->send("=[ Operator's Guide ]==================================================\n");
-	actor->send("                 I  N  T  R  O  D  U  C  T  I  O  N                    \n");
-	actor->send("-----------------------------------------------------------------------\n");
-	actor->send("  Dear Valued Customer,\n");
-	actor->send("\n");
-	actor->send("  Congratulations on your purchase of the greatest marvel humankind\n"
+	ctx->who->send("=[ Operator's Guide ]==================================================\n");
+	ctx->who->send("                 I  N  T  R  O  D  U  C  T  I  O  N                    \n");
+	ctx->who->send("-----------------------------------------------------------------------\n");
+	ctx->who->send("  Dear Valued Customer,\n");
+	ctx->who->send("\n");
+	ctx->who->send("  Congratulations on your purchase of the greatest marvel humankind\n"
 		"  has ever seen, certainly the finest wonder to grace your home, and\n"
 		"  without a doubt the most affordable AND easy-to-use product of its\n"
 		"  or indeed of any other kind! And, since 2023, guaranteed** free of\n"
@@ -90,21 +90,21 @@ HELP::intro(Actor *actor)
 		"    required to include with this product -- a passcode will be\n"
 		"    required.\n"
 	);
-	actor->send("=======================================================================\n");
+	ctx->who->send("=======================================================================\n");
 	return true;
 }
 
 bool
-HELP::disclaimers(Actor *actor)
+HELP::disclaimers(ExecutionContext *ctx)
 {
 	if(argc() >= 3)
 	{
-		actor->send("Sorry, that passcode is not correct. You will continue to be opted in to all features.\n"
+		ctx->who->send("Sorry, that passcode is not correct. You will continue to be opted in to all features.\n"
 			"Please note that no responsibility can be taken for death or inury as a\n"
 			"result of features which you have chosen not to or failed to opt out of.\n");
 		return false;
 	}
-	actor->send("In order to read the disclaimers and withdraw your consent from\n"
+	ctx->who->send("In order to read the disclaimers and withdraw your consent from\n"
 		"certain value-added features, such as implosion, quantum displacement,\n"
 		"direct neural marketing, and Sudden Uncertainty Syndrome, you must\n"
 		"enter the passcode printed on the 2cm x 1cm barcode label on the inner\n"

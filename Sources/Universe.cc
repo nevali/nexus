@@ -188,14 +188,14 @@ Universe::builtinsParser(void)
 }
 
 Parser *
-Universe::parserForCommand(Actor *who, const char *commandLine)
+Universe::parserForCommand(ExecutionContext *context, const char *commandLine, size_t len)
 {
-	if(!commandLine || !*commandLine)
+	if(!len || !commandLine || !*commandLine)
 	{
 		return NULL;
 	}
 	/* only Players can access the builtins */
-	if(who->isPlayer() && _builtinsParser)
+	if(context->who && context->who->isPlayer() && _builtinsParser)
 	{
 		if(*commandLine == '@')
 		{

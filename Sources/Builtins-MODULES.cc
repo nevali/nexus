@@ -8,13 +8,13 @@
 using namespace Nexus;
 
 bool
-Builtins::MODULES::execute(Actor *actor)
+Builtins::MODULES::execute(ExecutionContext *ctx)
 {
 	WARP::Flux::TArray<Module> *modules;
 	Module *mod;
 	size_t index;
 
-	actor->send("=[ Active Modules ]====================================================\n");
+	ctx->who->send("=[ Active Modules ]====================================================\n");
 
 	modules = _universe->modules();
 	for(index = 0; index < modules->count(); index++)
@@ -22,12 +22,12 @@ Builtins::MODULES::execute(Actor *actor)
 		mod = modules->objectAtIndex(index);
 		if(mod)
 		{
-			actor->sendf("%s\n", mod->name());
+			ctx->who->sendf("%s\n", mod->name());
 			mod->release();
 		}
 	}
 	modules->release();
 
-	actor->send("=======================================================================\n");
+	ctx->who->send("=======================================================================\n");
 	return true;
 }

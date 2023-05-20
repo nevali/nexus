@@ -5,6 +5,8 @@
 
 namespace Nexus
 {
+	struct ExecutionContext;
+
 	class Actor: public Container
 	{
 		protected:
@@ -22,8 +24,9 @@ namespace Nexus
 		public:
 			virtual TypeID typeId(void) const { return ACTOR; }
 			virtual bool isActor(void) const { return true; }
-			virtual bool perform(const char *command);
 			virtual bool setFlag(const char *flag, bool set = true);
+			virtual bool perform(const char *command, size_t len = -1);
+			virtual bool perform(ExecutionContext *context, const char *command, size_t cmdlen);
 		public:
 			/* the following methods provide the logic for finding different
 			 * types of object within the Actor's current scope (which may

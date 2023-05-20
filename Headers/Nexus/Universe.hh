@@ -14,7 +14,8 @@ namespace Nexus
 {
 	class Parser;
 	class Module;
-
+	struct ExecutionContext;
+	
 	typedef long long Ticks;
 
 	class Universe: public WARP::Flux::Object
@@ -132,7 +133,7 @@ namespace Nexus
 			virtual Channel *newChannel(const char *name = NULL, bool allocId = false, Container *location = NULL) __attribute__ (( warn_unused_result ));
 
 			/* command parsers */
-			virtual Parser *parserForCommand(Actor *actor, const char *commandLine) __attribute__ (( warn_unused_result ));
+			virtual Parser *parserForCommand(ExecutionContext *actor, const char *commandLine, size_t length) __attribute__ (( warn_unused_result ));
 			virtual Parser *builtinsParser(void) __attribute__ (( warn_unused_result ));
 
 			/* invoked to advance the Universe's clocks, if enough (real) time

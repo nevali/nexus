@@ -6,24 +6,24 @@ using namespace Nexus;
 using namespace Nexus::Modules::Builder;
 
 bool
-DESTROY::execute(Actor *actor)
+DESTROY::execute(ExecutionContext *ctx)
 {
 	Thing *thing;
 	bool r;
 
 	if(argc() != 2)
 	{
-		actor->send("Usage: @DESTROY WHAT\n");
+		ctx->who->send("Usage: @DESTROY WHAT\n");
 		return false;
 	}
-	thing = actor->resolveIdOrBuiltin(argv(1));
+	thing = ctx->who->resolveIdOrBuiltin(argv(1));
 	if(!thing)
 	{
-		actor->sendf("Sorry, I can't find '%s'\n", argv(1));
+		ctx->who->sendf("Sorry, I can't find '%s'\n", argv(1));
 		return false;
 	}
 	r = true;
-	thing->destroy(actor);
+	thing->destroy(ctx->who);
 	thing->release();
 	return r;
 }

@@ -19,10 +19,10 @@ iswhitespace(int ch)
 	return false;
 }
 
-Tokens::Tokens(const char *source):
+Tokens::Tokens(const char *source, size_t length):
 	WARP::Flux::PointerArray(),
 	_source(NULL),
-	_length(0),
+	_length(length),
 	_quoted(0)
 {
 	size_t start, pos;
@@ -30,7 +30,10 @@ Tokens::Tokens(const char *source):
 
 	_source = strdup(source);
 	start = 0;
-	_length = strlen(_source);
+	if(_length == (size_t) -1)
+	{
+		_length = strlen(_source);
+	}
 	e = false;
 	while(start < _length)
 	{

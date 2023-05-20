@@ -21,8 +21,8 @@ namespace Nexus
 			};
 
 			DECLARE_COMMAND_(HELP,
-				bool intro(Actor *actor);
-				bool disclaimers(Actor *actor);
+				bool intro(ExecutionContext *ctx);
+				bool disclaimers(ExecutionContext *ctx);
 			);
 		}
 	}

@@ -6,13 +6,13 @@ using namespace Nexus;
 using namespace Nexus::Modules::Comms;
 
 bool
-EMIT::execute(Actor *who)
+EMIT::execute(ExecutionContext *ctx)
 {
 	if(argc() != 2)
 	{
-		who->send("Usage: @EMIT TEXT\n");
+		ctx->who->send("Usage: @EMIT TEXT\n");
 		return false;
 	}
-	who->emitf("%s\n", argv(1));
+	ctx->who->emitf("%s\n", argv(1));
 	return true;
 }

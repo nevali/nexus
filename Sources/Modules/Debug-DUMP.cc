@@ -6,27 +6,27 @@ using namespace Nexus;
 using namespace Nexus::Modules::Debug;
 
 bool
-DUMP::execute(Actor *actor)
+DUMP::execute(ExecutionContext *ctx)
 {
 	Thing *thing;
 
 	if(argc() > 2)
 	{
-		actor->send("Usage: @EXAMINE [WHAT]\n");
+		ctx->who->send("Usage: @EXAMINE [WHAT]\n");
 		return false;
 	}
 	if(argc() < 2)
 	{
-		actor->dump(actor);
+		ctx->who->dump(ctx->who);
 		return true;
 	}
-	thing = actor->resolveIdOrBuiltin(argv(1));
+	thing = ctx->who->resolveIdOrBuiltin(argv(1));
 	if(!thing)
 	{
-		actor->sendf("Sorry, I can't find '%s'\n", argv(1));
+		ctx->who->sendf("Sorry, I can't find '%s'\n", argv(1));
 		return false;
 	}
-	thing->dump(actor);
+	thing->dump(ctx->who);
 	thing->release();
 	return true;
 }

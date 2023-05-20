@@ -5,12 +5,12 @@
 using namespace Nexus;
 
 bool
-Builtins::QUIT::execute(Actor *actor)
+Builtins::QUIT::execute(ExecutionContext *ctx)
 {
-	actor->send("Goodbye!\n");
-	if(actor->isPlayer())
+	ctx->who->send("Goodbye!\n");
+	if(ctx->who->isPlayer())
 	{
-		actor->asPlayer()->disconnect();
+		ctx->who->asPlayer()->disconnect();
 	}
 	return true;
 }

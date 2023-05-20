@@ -44,7 +44,7 @@ BuiltinsParser::BuiltinsParser(Universe *universe):
 }
 
 Command *
-BuiltinsParser::parse(Actor *who, const char *commandLine)
+BuiltinsParser::parse(ExecutionContext *context, const char *commandLine, size_t length)
 {
 	Tokens *tokens;
 	const char *cmdstr;
@@ -63,7 +63,7 @@ BuiltinsParser::parse(Actor *who, const char *commandLine)
 	 * the '@' to the first whitespace OR forward-slash to the command
 	 * name
 	 */
-	tokens = new Tokens(commandLine);
+	tokens = new Tokens(commandLine, length);
 	cmdstr = tokens->raw(0);
 	if(!cmdstr || cmdstr[0] != '@')
 	{
@@ -106,19 +106,19 @@ BuiltinsParser::parse(Actor *who, const char *commandLine)
 		if(clash)
 		{
 			bool first = true;
-			who->sendf("Multiple command matches for '@%s':\n  ", cmdstr);
+			context->who->sendf("Multiple command matches for '@%s':\n  ", cmdstr);
 			for(c = 0; c < _ncommands; c++)
 			{
 				if(!(_commands[c].flags & CommandEntry::UNAMBIGUOUS))
 				{
 					if(!strncasecmp(_commands[c].name, cmdstr, cmdlen))
 					{
-						who->sendf("%s@%s", (first ? "" : ", "), _commands[c].name);
+						context->who->sendf("%s@%s", (first ? "" : ", "), _commands[c].name);
 						first = false;
 					}
 				}
 			}
-			who->send("\n");
+			context->who->send("\n");
 			tokens->release();
 			return NULL;
 		}
@@ -129,7 +129,7 @@ BuiltinsParser::parse(Actor *who, const char *commandLine)
 		}
 		else
 		{
-			who->sendf("Sorry, the command '@%s' was not recognised.\n", cmdstr);
+			context->who->sendf("Sorry, the command '@%s' was not recognised.\n", cmdstr);
 			tokens->release();
 			return NULL;
 		}
@@ -139,7 +139,7 @@ BuiltinsParser::parse(Actor *who, const char *commandLine)
 	 */
 	if(!exact->constructor)
 	{
-		who->sendf("Sorry, the '@%s' command is not implemented.\n", exact->name);
+		context->who->sendf("Sorry, the '@%s' command is not implemented.\n", exact->name);
 		tokens->release();
 		return NULL;
 	}

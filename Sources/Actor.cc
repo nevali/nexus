@@ -40,10 +40,10 @@ Actor::deactivate(void)
 
 /* Perform a command */
 bool
-Actor::perform(const char *commandLine)
+Actor::perform(const char *commandLine, size_t len)
 {
-	Parser *parser;
-	Command *cmd;
+	ExecutionContext *context;
+	bool r;
 
 	if(!commandLine)
 	{
@@ -54,27 +54,47 @@ Actor::perform(const char *commandLine)
 		::debugf("Actor::%s: cannot perform commands without a universe\n", __FUNCTION__);
 		return false;
 	}
-	for(; *commandLine && (isblank(*commandLine) || *commandLine == '\r' || *commandLine == '\n'); commandLine++);
-	if(!*commandLine)
+	if(len == (size_t) - 1)
 	{
+		len = strlen(commandLine);
+	}
+	context = new ExecutionContext(this);
+	r = perform(context, commandLine, len);
+	delete context;
+	return r;
+}
+
+/* Perform a command in an execution context */
+bool
+Actor::perform(ExecutionContext *context, const char *commandLine, size_t len)
+{
+	Parser *parser;
+	Command *cmd;
+
+	context->result = false;
+	for(; len && *commandLine && (isblank(*commandLine) || *commandLine == '\r' || *commandLine == '\n'); commandLine++)
+	{
+		len--;
+	}
+	if(!len || !*commandLine)
+	{
+		context->result = true;
 		return true;
 	}
-	parser = _universe->parserForCommand(this, commandLine);
+	parser = _universe->parserForCommand(context, commandLine, len);
 	if(parser)
 	{
-		cmd = parser->parse(this, commandLine);
+		cmd = parser->parse(context, commandLine, len);
 		parser->release();
 		if(cmd)
 		{
-			bool r;
-
-			r = cmd->execute(this);
+			context->result = cmd->execute(context);
 			cmd->release();
-			return r;
+			return context->result;
 		}
 		return false;		
 	}
-	send("I'm sorry, I don't know how to do that.\n");
+	context->who->send("I'm sorry, I don't know how to do that.\n");
 	return false;
 }
 
